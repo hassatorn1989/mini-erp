@@ -37,7 +37,7 @@ class PrefixController extends Controller
             ->withQueryString();
 
         return Inertia::render('prefixes/index', [
-            'prefixes' => $prefixes,
+            'items' => $prefixes,
             'filters' => [
                 'search' => $filters['search'] ?? '',
                 'status' => $filters['status'] ?? '',
