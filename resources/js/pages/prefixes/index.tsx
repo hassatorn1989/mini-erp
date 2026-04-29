@@ -14,6 +14,24 @@ import { Head, useForm } from '@inertiajs/react';
 import { DialogTrigger } from '@radix-ui/react-dialog';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { Payment, columns } from './column';
+import { DataTable } from '@/components/data-table';
+import { FieldGroup } from '@/components/ui/field';
+import { Label } from 'radix-ui';
+
+async function getData(): Promise<Payment[]> {
+    // Fetch data from your API here.
+    return [
+        {
+            id: '728ed52f',
+            amount: 100,
+            status: 'pending',
+            email: 'm@example.com',
+        },
+        // ...
+    ];
+}
+
 
 export default function PrefixIndex() {
     const [open, setOpen] = useState(false);
@@ -37,13 +55,11 @@ export default function PrefixIndex() {
                         สร้างรายการ
                     </Button>
                 </div>
+                <DataTable columns={columns} data={[]} />
             </div>
 
             <Dialog open={open} onOpenChange={handleOpenChange}>
                 <form>
-                    <DialogTrigger asChild>
-                        <Button variant="outline">Open Dialog</Button>
-                    </DialogTrigger>
                     <DialogContent className="sm:max-w-sm">
                         <DialogHeader>
                             <DialogTitle>Edit profile</DialogTitle>
@@ -52,8 +68,8 @@ export default function PrefixIndex() {
                                 when you&apos;re done.
                             </DialogDescription>
                         </DialogHeader>
-                        {/* <FieldGroup>
-                            <Field>
+                        <FieldGroup>
+                            {/* <Field>
                                 <Label htmlFor="name-1">Name</Label>
                                 <Input
                                     id="name-1"
@@ -68,8 +84,8 @@ export default function PrefixIndex() {
                                     name="username"
                                     defaultValue="@peduarte"
                                 />
-                            </Field>
-                        </FieldGroup> */}
+                            </Field> */}
+                        </FieldGroup>
                         <DialogFooter>
                             <DialogClose asChild>
                                 <Button variant="outline">Cancel</Button>
