@@ -1,22 +1,18 @@
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+
 import { dashboard } from '@/routes';
-import { Head, useForm } from '@inertiajs/react';
-import { DialogTrigger } from '@radix-ui/react-dialog';
+import { Head, router, useForm } from '@inertiajs/react';
 import { Plus, Search, X } from 'lucide-react';
-import { useState } from 'react';
-import { PrefixItem, columns } from './column';
+import { useMemo, useState } from 'react';
+import { PrefixItem, getColumns } from './column';
 import { AppDataTable } from '@/components/system/app-datatable';
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import {
+    Field,
+    FieldDescription,
+    FieldGroup,
+    FieldLabel,
+} from '@/components/ui/field';
 import {
     Select,
     SelectContent,
@@ -27,7 +23,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Filters, PaginatedPrefixes } from './type';
 import { AppPagination } from '@/components/system/app-pagination';
-
+import { AppDialog } from '@/components/system/app-dialog';
+import {
+    destroy,
+    index,
+    store,
+    update,
+} from '@/actions/App/Http/Controllers/PrefixController';
 export default function PrefixIndex({
     items,
     filters,
@@ -35,15 +37,90 @@ export default function PrefixIndex({
     items: PaginatedPrefixes;
     filters: Filters;
 }) {
-    const [open, setOpen] = useState(false);
+    const [openForm, setOpenForm] = useState(false);
+    const [openDelete, setOpenDelete] = useState(false);
+    const [selectedItem, setSelectedItem] = useState<PrefixItem | null>(null);
     const [filterValues, setFilterValues] = useState<Filters>(filters);
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const form = useForm({
+        id: null,
         name: '',
+        is_active: true,
     });
 
-    const handleOpenChange = (isOpen: boolean) => {
-        setOpen(isOpen);
+    const handleCreate = () => {
+        setOpenForm(true);
+        setErrors({});
+        form.reset();
+    };
+
+    const handleEdit = (item: PrefixItem) => {
+        setOpenForm(true);
+        setErrors({});
+        form.setData({
+            id: item.id,
+            name: item.name,
+            is_active: item.is_active,
+        });
+    };
+
+    const handleDelete = (item: PrefixItem) => {
+        setSelectedItem(item);
+        setOpenDelete(true);
+    };
+
+    const columns = useMemo(
+        () =>
+            getColumns({
+                onEdit: handleEdit,
+                onDelete: handleDelete,
+            }),
+        [],
+    );
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const payload = {
+            name: form.data.name,
+            is_active: form.data.is_active,
+        };
+
+        setProcessing(true);
+
+        if (form.data.id) {
+            router.put(update(form.data.id), payload, {
+                preserveScroll: true,
+                onError: (errors) => {
+                    setErrors(errors);
+                    setProcessing(false);
+                },
+                onSuccess: () => {
+                    setOpenForm(false);
+                    form.reset();
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                },
+            });
+        } else {
+            router.post(store(), payload, {
+                preserveScroll: true,
+                onError: (errors) => {
+                    setErrors(errors);
+                    setProcessing(false);
+                },
+                onSuccess: () => {
+                    setOpenForm(false);
+                    form.reset();
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                },
+            });
+        }
     };
 
     return (
@@ -52,8 +129,8 @@ export default function PrefixIndex({
             <div className="flex h-full flex-1 flex-col gap-5 overflow-x-auto p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <Heading title="asdas" description="asdasd" />
-
-                    <Button onClick={() => handleOpenChange(true)}>
+                    <p>{form.processing ? 'Loading...' : 'Ready'}</p>
+                    <Button onClick={handleCreate}>
                         <Plus />
                         สร้างรายการ
                     </Button>
@@ -117,13 +194,7 @@ export default function PrefixIndex({
                             ))}
                         </SelectContent>
                     </Select>
-                    <Button
-                        onClick={() =>
-                            form.submit('get', dashboard('prefixes'), {
-                                preserveState: true,
-                            })
-                        }
-                    >
+                    <Button>
                         <Search className="size-4" />
                         Apply
                     </Button>
@@ -142,7 +213,7 @@ export default function PrefixIndex({
                         Reset
                     </Button>
                 </form>
-                <AppDataTable columns={columns} data={items.data} />{' '}
+                <AppDataTable columns={columns} data={items.data} />
                 <div className="flex items-center justify-between">
                     <div className="hidden text-sm text-muted-foreground sm:block">
                         แสดง {items.from ?? 0} - {items.to ?? 0} จากทั้งหมด{' '}
@@ -152,45 +223,37 @@ export default function PrefixIndex({
                 </div>
             </div>
 
-            <Dialog open={open} onOpenChange={handleOpenChange}>
-                <form>
-                    <DialogContent className="sm:max-w-sm">
-                        <DialogHeader>
-                            <DialogTitle>Edit profile</DialogTitle>
-                            <DialogDescription>
-                                Make changes to your profile here. Click save
-                                when you&apos;re done.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <FieldGroup>
-                            <Field>
-                                <FieldLabel htmlFor="name-1">Name</FieldLabel>
-                                <Input
-                                    id="name-1"
-                                    name="name"
-                                    defaultValue="Pedro Duarte"
-                                />
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="username-1">
-                                    Username
-                                </FieldLabel>
-                                <Input
-                                    id="username-1"
-                                    name="username"
-                                    defaultValue="@peduarte"
-                                />
-                            </Field>
-                        </FieldGroup>
-                        <DialogFooter>
-                            <Button type="submit">Save changes</Button>
-                            <DialogClose asChild>
-                                <Button variant="outline">Cancel</Button>
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
-                </form>
-            </Dialog>
+            <AppDialog
+                open={openForm}
+                onOpenChange={setOpenForm}
+                title="สร้าง Prefix ใหม่"
+                description="กรุณากรอกข้อมูลด้านล่างเพื่อสร้าง Prefix ใหม่"
+                processing={processing}
+                onSubmit={(e) => {
+                    handleSubmit(e);
+                }}
+            >
+                <FieldGroup>
+                    <Field data-invalid={!!errors.name}>
+                        <FieldLabel htmlFor="input-invalid">
+                            คำนำหน้า <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                            id="input-invalid"
+                            aria-invalid={!!errors.name}
+                            value={form.data.name}
+                            onChange={(e) =>
+                                form.setData('name', e.target.value)
+                            }
+                        />
+                        {errors.name && (
+                            <FieldDescription className="text-destructive">
+                                {errors.name}
+                            </FieldDescription>
+                        )}
+                    </Field>
+                </FieldGroup>
+            </AppDialog>
         </>
     );
 }

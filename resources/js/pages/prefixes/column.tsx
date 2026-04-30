@@ -4,7 +4,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
@@ -13,21 +12,27 @@ import { Button } from '@/components/ui/button';
 import { Item } from './type';
 import ActiveBadge from '@/components/system/active-badge';
 
-export const columns: ColumnDef<Item>[] = [
-    {
-        id: 'row_no',
-        header: '#',
-        size: 5,
-        cell: ({ row }) => {
-            return row.index + 1;
-        },
-    },
+type ColumnsProps = {
+    onEdit: (item: Item) => void;
+    onDelete: (item: Item) => void;
+};
+
+export const getColumns = ({
+    onEdit,
+    onDelete,
+}: ColumnsProps): ColumnDef<Item>[] => [
+    // {
+    //     id: 'row_no',
+    //     header: '#',
+    //     size: 5,
+    //     cell: ({ row }) => row.index + 1,
+    // },
     {
         accessorKey: 'name',
         header: 'Name',
         size: 40,
         cell: ({ row }) => {
-            const name = row.getValue('name');
+            const name = row.getValue<string>('name');
 
             return name;
         },
@@ -37,7 +42,7 @@ export const columns: ColumnDef<Item>[] = [
         header: 'Status',
         size: 10,
         cell: ({ row }) => {
-            const isActive = row.getValue('is_active');
+            const isActive = row.getValue<boolean>('is_active');
 
             return <ActiveBadge isActive={isActive} />;
         },
@@ -47,16 +52,18 @@ export const columns: ColumnDef<Item>[] = [
         header: 'Created At',
         size: 20,
         cell: ({ row }) => {
-            const createdAt = row.getValue('created_at');
+            const createdAt = row.getValue<string>('created_at');
 
             return createdAt;
         },
     },
     {
-        accessorKey: 'actions',
+        id: 'actions',
         header: 'Actions',
         size: 20,
         cell: ({ row }) => {
+            const item = row.original;
+
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -65,10 +72,16 @@ export const columns: ColumnDef<Item>[] = [
                             <span className="sr-only">Open menu</span>
                         </Button>
                     </DropdownMenuTrigger>
+
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        {/* <DropdownMenuSeparator /> */}
-                        <DropdownMenuItem variant="destructive">
+                        <DropdownMenuItem onSelect={() => onEdit(item)}>
+                            Edit
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => onDelete(item)}
+                        >
                             Delete
                         </DropdownMenuItem>
                     </DropdownMenuContent>

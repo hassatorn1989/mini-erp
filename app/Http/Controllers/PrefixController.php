@@ -72,7 +72,7 @@ class PrefixController extends Controller
 
     public function update(UpdatePrefixRequest $request, Prefix $prefix): RedirectResponse
     {
-        $prefix->update($request->validated());
+        $prefix->update($request->validated() + ['is_active' => $request->has('is_active')]);
 
         return redirect()
             ->route('prefixes.index')
