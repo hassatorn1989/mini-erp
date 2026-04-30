@@ -1,12 +1,12 @@
 'use client';
 
+import type { ColumnDef } from '@tanstack/react-table';
 import {
-    ColumnDef,
     flexRender,
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { FolderX, SearchX } from  'lucide-react';
+import { FolderX } from 'lucide-react';
 
 import {
     Table,
@@ -16,26 +16,22 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination';
-import { AppPagination } from './app-pagination';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    emptyDescription?: string;
+    emptyTitle?: string;
 }
 
 export function AppDataTable<TData, TValue>({
     columns,
     data,
+    emptyDescription = 'No results.',
+    emptyTitle = 'No data found',
 }: DataTableProps<TData, TValue>) {
+    // TanStack Table intentionally returns callable table helpers from this hook.
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data,
         columns,
@@ -44,9 +40,9 @@ export function AppDataTable<TData, TValue>({
 
     return (
         <>
-            <div className="overflow-hidden rounded-md border">
+            <div className="overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-muted text-muted-foreground">
+                    <TableHeader className="bg-muted/50 text-muted-foreground">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
@@ -56,6 +52,7 @@ export function AppDataTable<TData, TValue>({
                                             style={{
                                                 width: `${header.getSize()}%`,
                                             }}
+                                            className="h-11 px-4 text-xs font-semibold tracking-wide uppercase"
                                         >
                                             {header.isPlaceholder
                                                 ? null
@@ -78,9 +75,13 @@ export function AppDataTable<TData, TValue>({
                                     data-state={
                                         row.getIsSelected() && 'selected'
                                     }
+                                    className="hover:bg-muted/35"
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            className="px-4 py-3"
+                                        >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext(),
@@ -93,11 +94,16 @@ export function AppDataTable<TData, TValue>({
                             <TableRow>
                                 <TableCell
                                     colSpan={columns.length}
-                                    className="h-24 py-15 text-center"
+                                    className="h-48 py-12 text-center"
                                 >
-                                    <FolderX className="mx-auto mb-2 h-15 w-15 opacity-50" />
-                                    <p className="text-sm text-muted-foreground">
-                                        No results.
+                                    <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                                        <FolderX className="size-6" />
+                                    </div>
+                                    <p className="text-sm font-medium">
+                                        {emptyTitle}
+                                    </p>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {emptyDescription}
                                     </p>
                                 </TableCell>
                             </TableRow>

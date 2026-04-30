@@ -1,0 +1,23 @@
+<?php
+
+return [
+    'active' => 'ใช้งาน',
+    'all_statuses' => 'ทุกสถานะ',
+    'apply' => 'ค้นหา',
+    'cancel' => 'ยกเลิก',
+    'create' => 'สร้าง',
+    'delete' => 'ลบ',
+    'edit' => 'แก้ไข',
+    'filtered_results' => 'ผลลัพธ์ที่กรองแล้ว',
+    'inactive' => 'ไม่ใช้งาน',
+    'language' => 'ภาษา',
+    'next' => 'ถัดไป',
+    'open_menu' => 'เปิดเมนู',
+    'previous' => 'ก่อนหน้า',
+    'reset' => 'ล้างค่า',
+    'rows' => 'แถว',
+    'save' => 'บันทึก',
+    'save_changes' => 'บันทึกการเปลี่ยนแปลง',
+    'saving' => 'กำลังบันทึก...',
+    'status' => 'สถานะ',
+];

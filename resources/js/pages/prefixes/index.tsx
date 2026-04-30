@@ -1,18 +1,39 @@
-import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
-
-import { dashboard } from '@/routes';
 import { Head, router, useForm } from '@inertiajs/react';
-import { Plus, Search, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { PrefixItem, getColumns } from './column';
+import { Filter, Plus, Search, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import {
+    destroy,
+    index,
+    store,
+    update,
+} from '@/actions/App/Http/Controllers/PrefixController';
+import Heading from '@/components/heading';
 import { AppDataTable } from '@/components/system/app-datatable';
+import { AppDialog } from '@/components/system/app-dialog';
+import { AppPagination } from '@/components/system/app-pagination';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Field,
+    FieldContent,
     FieldDescription,
     FieldGroup,
     FieldLabel,
 } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -20,16 +41,24 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Filters, PaginatedPrefixes } from './type';
-import { AppPagination } from '@/components/system/app-pagination';
-import { AppDialog } from '@/components/system/app-dialog';
-import {
-    destroy,
-    index,
-    store,
-    update,
-} from '@/actions/App/Http/Controllers/PrefixController';
+import { Switch } from '@/components/ui/switch';
+import { useTranslations } from '@/hooks/use-translations';
+import { dashboard } from '@/routes';
+import { getColumns } from './column';
+import type { Filters, PaginatedPrefixes, PrefixItem } from './type';
+
+type PrefixFormData = {
+    id: string | null;
+    name: string;
+    is_active: boolean;
+};
+
+const defaultFilters: Filters = {
+    search: '',
+    status: '',
+    per_page: 10,
+};
+
 export default function PrefixIndex({
     items,
     filters,
@@ -40,30 +69,68 @@ export default function PrefixIndex({
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedItem, setSelectedItem] = useState<PrefixItem | null>(null);
-    const [filterValues, setFilterValues] = useState<Filters>(filters);
+    const [filterValues, setFilterValues] = useState<Filters>({
+        ...defaultFilters,
+        ...filters,
+    });
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const { t } = useTranslations();
 
-    const form = useForm({
+    const form = useForm<PrefixFormData>({
         id: null,
         name: '',
         is_active: true,
     });
 
+    const activeCount = items.data.filter((item) => item.is_active).length;
+    const inactiveCount = items.data.length - activeCount;
+    const hasFilters =
+        !!filters.search || !!filters.status || filters.per_page !== 10;
+    const isEditing = !!form.data.id;
+
+    const submitFilters = (nextFilters: Filters = filterValues) => {
+        router.get(
+            index.url({
+                query: {
+                    search: nextFilters.search || undefined,
+                    status: nextFilters.status || undefined,
+                    per_page: nextFilters.per_page,
+                },
+            }),
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    };
+
+    const resetFilters = () => {
+        setFilterValues(defaultFilters);
+
+        router.get(index.url(), {}, { preserveScroll: true });
+    };
+
     const handleCreate = () => {
-        setOpenForm(true);
-        setErrors({});
         form.reset();
+        form.setData({
+            id: null,
+            name: '',
+            is_active: true,
+        });
+        setErrors({});
+        setOpenForm(true);
     };
 
     const handleEdit = (item: PrefixItem) => {
-        setOpenForm(true);
-        setErrors({});
         form.setData({
             id: item.id,
             name: item.name,
             is_active: item.is_active,
         });
+        setErrors({});
+        setOpenForm(true);
     };
 
     const handleDelete = (item: PrefixItem) => {
@@ -71,16 +138,13 @@ export default function PrefixIndex({
         setOpenDelete(true);
     };
 
-    const columns = useMemo(
-        () =>
-            getColumns({
-                onEdit: handleEdit,
-                onDelete: handleDelete,
-            }),
-        [],
-    );
+    const columns = getColumns({
+        onEdit: handleEdit,
+        onDelete: handleDelete,
+        t,
+    });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         const payload = {
@@ -90,161 +154,268 @@ export default function PrefixIndex({
 
         setProcessing(true);
 
+        const options = {
+            preserveScroll: true,
+            onError: (errors: Record<string, string>) => {
+                setErrors(errors);
+            },
+            onSuccess: () => {
+                setOpenForm(false);
+                form.reset();
+            },
+            onFinish: () => {
+                setProcessing(false);
+            },
+        };
+
         if (form.data.id) {
-            router.put(update(form.data.id), payload, {
-                preserveScroll: true,
-                onError: (errors) => {
-                    setErrors(errors);
-                    setProcessing(false);
-                },
-                onSuccess: () => {
-                    setOpenForm(false);
-                    form.reset();
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                },
-            });
-        } else {
-            router.post(store(), payload, {
-                preserveScroll: true,
-                onError: (errors) => {
-                    setErrors(errors);
-                    setProcessing(false);
-                },
-                onSuccess: () => {
-                    setOpenForm(false);
-                    form.reset();
-                },
-                onFinish: () => {
-                    setProcessing(false);
-                },
-            });
+            router.put(update(form.data.id), payload, options);
+
+            return;
         }
+
+        router.post(store(), payload, options);
+    };
+
+    const confirmDelete = () => {
+        if (!selectedItem) {
+            return;
+        }
+
+        setProcessing(true);
+
+        router.delete(destroy(selectedItem.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                setOpenDelete(false);
+                setSelectedItem(null);
+            },
+            onFinish: () => {
+                setProcessing(false);
+            },
+        });
     };
 
     return (
         <>
-            <Head title="Prefixes" />
-            <div className="flex h-full flex-1 flex-col gap-5 overflow-x-auto p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <Heading title="asdas" description="asdasd" />
-                    <p>{form.processing ? 'Loading...' : 'Ready'}</p>
-                    <Button onClick={handleCreate}>
+            <Head title={t('prefixes.title')} />
+
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <Heading
+                        title={t('prefixes.title')}
+                        description={t('prefixes.description')}
+                    />
+
+                    <Button onClick={handleCreate} className="w-full sm:w-fit">
                         <Plus />
-                        สร้างรายการ
+                        {t('prefixes.new')}
                     </Button>
                 </div>
-                <form
-                    className="grid gap-3 rounded-lg border bg-card p-3 md:grid-cols-[minmax(14rem,1fr)_10rem_8rem_8rem_8rem]"
-                    onSubmit={(e) => e.preventDefault()}
-                >
-                    <div className="relative">
-                        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            value={filterValues.search}
-                            onChange={(e) =>
-                                setFilterValues((current) => ({
-                                    ...current,
-                                    search: e.target.value,
-                                }))
-                            }
-                            className="pl-9"
-                            placeholder="Search by name"
+
+                <div className="grid gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs md:grid-cols-3 lg:px-0 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
+                    <Card size="sm">
+                        <CardHeader>
+                            <CardTitle>{t('prefixes.total')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-semibold">
+                                {items.total}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                {hasFilters
+                                    ? t('prefixes.matching_filters')
+                                    : t('prefixes.module_total')}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card size="sm">
+                        <CardHeader>
+                            <CardTitle>
+                                {t('prefixes.active_on_page')}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-semibold">
+                                {activeCount}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                {t('prefixes.active_card_description')}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Card size="sm">
+                        <CardHeader>
+                            <CardTitle>
+                                {t('prefixes.inactive_on_page')}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-semibold">
+                                {inactiveCount}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                                {t('prefixes.inactive_card_description')}
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <Card className="gap-3 py-3">
+                    <CardContent>
+                        <form
+                            className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_12rem_11rem_auto_auto]"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                submitFilters();
+                            }}
+                        >
+                            <div className="relative">
+                                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    value={filterValues.search}
+                                    onChange={(e) =>
+                                        setFilterValues((current) => ({
+                                            ...current,
+                                            search: e.target.value,
+                                        }))
+                                    }
+                                    className="pl-9"
+                                    placeholder={t(
+                                        'prefixes.search_placeholder',
+                                    )}
+                                />
+                            </div>
+
+                            <Select
+                                value={filterValues.status || 'all'}
+                                onValueChange={(value) =>
+                                    setFilterValues((prev) => ({
+                                        ...prev,
+                                        status: value === 'all' ? '' : value,
+                                    }))
+                                }
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder={t('ui.status')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">
+                                        {t('ui.all_statuses')}
+                                    </SelectItem>
+                                    <SelectItem value="active">
+                                        {t('ui.active')}
+                                    </SelectItem>
+                                    <SelectItem value="inactive">
+                                        {t('ui.inactive')}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+
+                            <Select
+                                value={filterValues.per_page.toString()}
+                                onValueChange={(value) =>
+                                    setFilterValues((prev) => ({
+                                        ...prev,
+                                        per_page: Number(value),
+                                    }))
+                                }
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder={t('ui.rows')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {[10, 15, 25, 50].map((size) => (
+                                        <SelectItem
+                                            key={size}
+                                            value={size.toString()}
+                                        >
+                                            {size} {t('ui.rows')}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Button type="submit" variant="secondary">
+                                <Filter className="size-4" />
+                                {t('ui.apply')}
+                            </Button>
+
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={resetFilters}
+                            >
+                                <X className="size-4" />
+                                {t('ui.reset')}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                <Card className="gap-0 py-0">
+                    <CardHeader className="border-b py-4">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <CardTitle>{t('prefixes.title')}</CardTitle>
+                                <p className="text-sm text-muted-foreground">
+                                    {t('prefixes.showing', {
+                                        from: items.from ?? 0,
+                                        to: items.to ?? 0,
+                                        total: items.total,
+                                    })}
+                                </p>
+                            </div>
+
+                            {hasFilters && (
+                                <Badge variant="outline">
+                                    {t('ui.filtered_results')}
+                                </Badge>
+                            )}
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="p-0">
+                        <AppDataTable
+                            columns={columns}
+                            data={items.data}
+                            emptyDescription={t('prefixes.empty_description')}
+                            emptyTitle={t('prefixes.empty_title')}
                         />
-                    </div>
-                    <Select
-                        value={filterValues.status}
-                        onValueChange={(value) =>
-                            setFilterValues((prev) => ({
-                                ...prev,
-                                status: value,
-                            }))
-                        }
-                    >
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Filter by status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {['all', 'active', 'inactive'].map((status) => (
-                                <SelectItem key={status} value={status}>
-                                    {status.charAt(0).toUpperCase() +
-                                        status.slice(1)}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Select
-                        value={filterValues.per_page.toString()}
-                        onValueChange={(value) =>
-                            setFilterValues((prev) => ({
-                                ...prev,
-                                per_page: parseInt(value, 10),
-                            }))
-                        }
-                    >
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Items per page" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {[10, 20, 50, 100].map((size) => (
-                                <SelectItem key={size} value={size.toString()}>
-                                    {size} per page
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Button>
-                        <Search className="size-4" />
-                        Apply
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            setFilterValues({
-                                search: '',
-                                status: '',
-                                per_page: 10,
-                            });
-                            form.reset('search', 'status', 'per_page');
-                        }}
-                    >
-                        <X className="size-4" />
-                        Reset
-                    </Button>
-                </form>
-                <AppDataTable columns={columns} data={items.data} />
-                <div className="flex items-center justify-between">
-                    <div className="hidden text-sm text-muted-foreground sm:block">
-                        แสดง {items.from ?? 0} - {items.to ?? 0} จากทั้งหมด{' '}
-                        {items.total} รายการ
-                    </div>
-                    <AppPagination links={items.links} />
-                </div>
+                    </CardContent>
+                </Card>
+
+                <AppPagination links={items.links} />
             </div>
 
             <AppDialog
                 open={openForm}
                 onOpenChange={setOpenForm}
-                title="สร้าง Prefix ใหม่"
-                description="กรุณากรอกข้อมูลด้านล่างเพื่อสร้าง Prefix ใหม่"
+                title={isEditing ? t('prefixes.edit') : t('prefixes.create')}
+                description={t('prefixes.dialog_description')}
+                submitLabel={
+                    isEditing ? t('ui.save_changes') : t('prefixes.create')
+                }
                 processing={processing}
-                onSubmit={(e) => {
-                    handleSubmit(e);
-                }}
+                onSubmit={handleSubmit}
             >
                 <FieldGroup>
                     <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="input-invalid">
-                            คำนำหน้า <span className="text-destructive">*</span>
+                        <FieldLabel htmlFor="prefix-name">
+                            {t('prefixes.name')}{' '}
+                            <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
-                            id="input-invalid"
+                            id="prefix-name"
                             aria-invalid={!!errors.name}
                             value={form.data.name}
                             onChange={(e) =>
                                 form.setData('name', e.target.value)
                             }
+                            placeholder={t('prefixes.placeholder')}
+                            autoFocus
                         />
                         {errors.name && (
                             <FieldDescription className="text-destructive">
@@ -252,8 +423,57 @@ export default function PrefixIndex({
                             </FieldDescription>
                         )}
                     </Field>
+
+                    <Field orientation="horizontal">
+                        <Switch
+                            id="prefix-is-active"
+                            checked={form.data.is_active}
+                            onCheckedChange={(checked) =>
+                                form.setData('is_active', checked)
+                            }
+                        />
+                        <FieldContent>
+                            <FieldLabel htmlFor="prefix-is-active">
+                                {t('ui.active')}
+                            </FieldLabel>
+                            <FieldDescription>
+                                {t('prefixes.available_hint')}
+                            </FieldDescription>
+                        </FieldContent>
+                    </Field>
                 </FieldGroup>
             </AppDialog>
+
+            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                            <Trash2 />
+                        </AlertDialogMedia>
+                        <AlertDialogTitle>
+                            {t('prefixes.delete_title')}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('prefixes.delete_confirmation', {
+                                name: selectedItem?.name ?? '',
+                            })}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={processing}>
+                            {t('ui.cancel')}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            disabled={processing}
+                            onClick={confirmDelete}
+                        >
+                            <Trash2 />
+                            {t('ui.delete')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }
@@ -266,7 +486,7 @@ PrefixIndex.layout = {
         },
         {
             title: 'Prefixes',
-            href: '#',
+            href: index(),
         },
     ],
 };

@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'active_card_description' => 'Ready for selection in forms',
+    'active_on_page' => 'Active on this page',
+    'available_hint' => 'Active prefixes are available for users when creating records.',
+    'create' => 'Create prefix',
+    'created_at' => 'Created At',
+    'delete_confirmation' => 'This will permanently delete :name. This action cannot be undone.',
+    'delete_title' => 'Delete prefix?',
+    'description' => 'Manage customer and contact name prefixes used across the system.',
+    'dialog_description' => 'Keep the prefix short and recognizable so it is easy to scan in forms and reports.',
+    'edit' => 'Edit prefix',
+    'empty_description' => 'Try changing your filters or create a new prefix.',
+    'empty_title' => 'No prefixes found',
+    'fields' => [
+        'description' => 'description',
+        'is_active' => 'status',
+        'name' => 'prefix name',
+    ],
+    'inactive_card_description' => 'Hidden from day-to-day use',
+    'inactive_on_page' => 'Inactive on this page',
+    'matching_filters' => 'Matching current filters',
+    'module_total' => 'All records in this module',
+    'name' => 'Prefix name',
+    'new' => 'New prefix',
+    'placeholder' => 'e.g. Mr., Mrs., Dr.',
+    'prefix' => 'Prefix',
+    'search_placeholder' => 'Search prefix name',
+    'showing' => 'Showing :from-:to of :total records',
+    'title' => 'Prefixes',
+    'total' => 'Total prefixes',
+];

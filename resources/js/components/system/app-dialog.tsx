@@ -1,5 +1,7 @@
-import { ReactNode } from 'react';
+import { Save, X } from 'lucide-react';
+import type { FormEvent, ReactNode } from 'react';
 
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogClose,
@@ -9,8 +11,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Save, X } from 'lucide-react';
+import { useTranslations } from '@/hooks/use-translations';
 import { Spinner } from '../ui/spinner';
 
 type AppDialogProps = {
@@ -26,7 +27,7 @@ type AppDialogProps = {
     cancelLabel?: string;
     processing?: boolean;
 
-    onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    onSubmit: (e: FormEvent<HTMLFormElement>) => void;
 };
 
 export function AppDialog({
@@ -35,15 +36,17 @@ export function AppDialog({
     title,
     description,
     children,
-    submitLabel = 'บันทึก',
-    cancelLabel = 'ยกเลิก',
+    submitLabel,
+    cancelLabel,
     processing = false,
     onSubmit,
 }: AppDialogProps) {
+    const { t } = useTranslations();
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-sm">
-                <form onSubmit={onSubmit} className="space-y-4">
+            <DialogContent className="sm:max-w-md">
+                <form onSubmit={onSubmit} className="space-y-5">
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
 
@@ -55,29 +58,30 @@ export function AppDialog({
                     <div className="space-y-4">{children}</div>
 
                     <DialogFooter>
+                        <DialogClose asChild>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                disabled={processing}
+                            >
+                                <X className="size-4" />
+                                {cancelLabel ?? t('ui.cancel')}
+                            </Button>
+                        </DialogClose>
+
                         <Button type="submit" disabled={processing}>
                             {processing ? (
                                 <>
                                     <Spinner className="size-4 animate-spin" />
-                                    กำลังบันทึก...
+                                    {t('ui.saving')}
                                 </>
                             ) : (
                                 <>
                                     <Save className="size-4" />
-                                    {submitLabel}
+                                    {submitLabel ?? t('ui.save')}
                                 </>
                             )}
                         </Button>
-                        <DialogClose asChild>
-                            <Button
-                                type="button"
-                                variant="destructive"
-                                disabled={processing}
-                            >
-                                <X className="size-4" />
-                                {cancelLabel}
-                            </Button>
-                        </DialogClose>
                     </DialogFooter>
                 </form>
             </DialogContent>

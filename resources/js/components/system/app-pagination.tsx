@@ -1,3 +1,4 @@
+import { router } from '@inertiajs/react';
 import {
     Pagination,
     PaginationContent,
@@ -8,7 +9,7 @@ import {
     PaginationPrevious,
 } from '@/components/ui/pagination';
 
-import { router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/use-translations';
 
 type PaginationLinkItem = {
     url: string | null;
@@ -21,13 +22,16 @@ type AppPaginationProps = {
 };
 
 export function AppPagination({ links }: AppPaginationProps) {
+    const { t } = useTranslations();
 
     // if (!links || links.length <= 3) {
     //     return null;
     // }
 
     const goToPage = (url: string | null) => {
-        if (!url) return;
+        if (!url) {
+            return;
+        }
 
         router.visit(url, {
             preserveScroll: true,
@@ -36,7 +40,7 @@ export function AppPagination({ links }: AppPaginationProps) {
     };
 
     return (
-        <Pagination className="justify-center md:justify-end">
+        <Pagination>
             <PaginationContent>
                 {links.map((link, index) => {
                     const label = link.label;
@@ -58,6 +62,7 @@ export function AppPagination({ links }: AppPaginationProps) {
                             {isPrevious ? (
                                 <PaginationPrevious
                                     href={link.url ?? '#'}
+                                    text={t('ui.previous')}
                                     onClick={(e) => {
                                         e.preventDefault();
                                         goToPage(link.url);
@@ -71,6 +76,7 @@ export function AppPagination({ links }: AppPaginationProps) {
                             ) : isNext ? (
                                 <PaginationNext
                                     href={link.url ?? '#'}
+                                    text={t('ui.next')}
                                     onClick={(e) => {
                                         e.preventDefault();
                                         goToPage(link.url);

@@ -23,7 +23,7 @@ class UpdatePrefixRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255', 'unique:prefixes,name'],
+            'name' => ['required', 'string', 'max:255', 'unique:prefixes,name' . ($this->prefix ? ',' . $this->prefix->id : '')],
             'description' => ['nullable', 'string', 'max:255'],
             'is_active' => ['nullable', 'boolean'],
         ];
@@ -37,11 +37,11 @@ class UpdatePrefixRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => trans('validation.required', ['attribute' => trans('prefixes.name')]),
-            'name.string' => trans('validation.string', ['attribute' => trans('prefixes.name')]),
-            'name.max' => trans('validation.max.string', ['attribute' => trans('prefixes.name'), 'max' => 255]),
-            'description.max' => trans('validation.max.string', ['attribute' => trans('prefixes.description'), 'max' => 255]),
-            'is_active.boolean' =>  trans('validation.boolean', ['attribute' => trans('prefixes.is_active')]),
+            'name.required' => trans('validation.required', ['attribute' => trans('prefixes.fields.name')]),
+            'name.string' => trans('validation.string', ['attribute' => trans('prefixes.fields.name')]),
+            'name.max' => trans('validation.max.string', ['attribute' => trans('prefixes.fields.name'), 'max' => 255]),
+            'description.max' => trans('validation.max.string', ['attribute' => trans('prefixes.fields.description'), 'max' => 255]),
+            'is_active.boolean' => trans('validation.boolean', ['attribute' => trans('prefixes.fields.is_active')]),
         ];
     }
 }

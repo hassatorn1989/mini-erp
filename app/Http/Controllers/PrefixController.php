@@ -30,8 +30,8 @@ class PrefixController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 });
             })
-            ->when(($filters['status'] ?? null) === 'active', fn($query) => $query->where('is_active', true))
-            ->when(($filters['status'] ?? null) === 'inactive', fn($query) => $query->where('is_active', false))
+            ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->where('is_active', true))
+            ->when(($filters['status'] ?? null) === 'inactive', fn ($query) => $query->where('is_active', false))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
@@ -72,7 +72,7 @@ class PrefixController extends Controller
 
     public function update(UpdatePrefixRequest $request, Prefix $prefix): RedirectResponse
     {
-        $prefix->update($request->validated() + ['is_active' => $request->has('is_active')]);
+        $prefix->update($request->validated());
 
         return redirect()
             ->route('prefixes.index')
