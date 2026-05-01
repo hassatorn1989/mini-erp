@@ -1,4 +1,4 @@
-import type { PaginationLink } from "../warehouses/type";
+import type { PaginationLink } from "@/types/default";
 
 export type DepartmentItem = {
     id: string;
@@ -15,7 +15,7 @@ export type DepartmentFormState = {
     is_active: boolean;
 };
 
-export const emptyForm: DepartmentFormState = {
+export const emptyDepartmentForm: DepartmentFormState = {
     id: null,
     code: '',
     name: '',

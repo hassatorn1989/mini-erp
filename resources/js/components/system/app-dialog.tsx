@@ -28,6 +28,7 @@ type AppDialogProps = {
     processing?: boolean;
 
     onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+    className?: string;
 };
 
 export function AppDialog({
@@ -40,12 +41,13 @@ export function AppDialog({
     cancelLabel,
     processing = false,
     onSubmit,
+    className = '',
 }: AppDialogProps) {
     const { t } = useTranslations();
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className={`${className}`}>
                 <form onSubmit={onSubmit} className="space-y-5">
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>

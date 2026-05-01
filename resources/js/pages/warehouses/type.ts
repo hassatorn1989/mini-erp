@@ -23,7 +23,7 @@ export type WarehouseFormState = {
     is_active: boolean;
 };
 
-export const emptyForm: WarehouseFormState = {
+export const emptyWarehouseForm: WarehouseFormState = {
     id: null,
     code: '',
     name: '',

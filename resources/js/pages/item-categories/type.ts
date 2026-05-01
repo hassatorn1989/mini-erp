@@ -25,7 +25,7 @@ export type ItemCategoryFormState = {
     is_active: boolean;
 };
 
-export const emptyForm: ItemCategoryFormState = {
+export const emptyItemCategoryForm: ItemCategoryFormState = {
     id: null,
     parent_id: null,
     code: '',

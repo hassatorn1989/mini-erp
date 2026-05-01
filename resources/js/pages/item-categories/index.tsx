@@ -47,11 +47,12 @@ import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
 import { defaultFilters, Filters } from '@/types/default';
-import type {
-    ItemCategoryFormState,
-    ItemCategoryItem,
-    ItemCategoryPaginate,
-    ParentCategoryOption,
+import {
+    emptyItemCategoryForm,
+    type ItemCategoryFormState,
+    type ItemCategoryItem,
+    type ItemCategoryPaginate,
+    type ParentCategoryOption,
 } from './type';
 
 export default function ItemCategoryIndex({
@@ -76,13 +77,7 @@ export default function ItemCategoryIndex({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const { t } = useTranslations();
 
-    const form = useForm<ItemCategoryFormState>({
-        id: null,
-        parent_id: null,
-        code: '',
-        name: '',
-        is_active: true,
-    });
+    const form = useForm<ItemCategoryFormState>(emptyItemCategoryForm);
 
     const activeCount = items.data.filter((item) => item.is_active).length;
     const inactiveCount = items.data.length - activeCount;
@@ -115,11 +110,7 @@ export default function ItemCategoryIndex({
 
     const handleCreate = () => {
         form.reset();
-        form.setData({
-            id: null,
-            name: '',
-            is_active: true,
-        });
+        form.setData(emptyItemCategoryForm);
         setErrors({});
         setOpenForm(true);
     };

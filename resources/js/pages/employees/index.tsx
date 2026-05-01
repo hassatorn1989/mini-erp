@@ -7,7 +7,7 @@ import {
     index,
     store,
     update,
-} from '@/actions/App/Http/Controllers/PositionController';
+} from '@/actions/App/Http/Controllers/EmployeeController';
 import Heading from '@/components/heading';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
@@ -45,20 +45,20 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import { type PositionPaginate, type PositionFormState, type PositionItem, emptyPositionForm } from './type';
+import { type EmployeePaginate, type EmployeeFormState, type EmployeeItem, employeeEmptyForm } from './type';
 import { defaultFilters, Filters } from '@/types/default';
 
 
-export default function PositionIndex({
+export default function EmployeeIndex({
     items,
     filters,
 }: {
-    items: PositionPaginate;
+    items: EmployeePaginate;
     filters: Filters;
 }) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<PositionItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<EmployeeItem | null>(null);
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
@@ -67,7 +67,7 @@ export default function PositionIndex({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const { t } = useTranslations();
 
-    const form = useForm<PositionFormState>(emptyPositionForm);
+    const form = useForm<EmployeeFormState>(employeeEmptyForm);
 
     const activeCount = items.data.filter((item) => item.is_active).length;
     const inactiveCount = items.data.length - activeCount;
@@ -100,22 +100,33 @@ export default function PositionIndex({
 
     const handleCreate = () => {
         form.reset();
-        form.setData(emptyPositionForm);
+        form.setData(employeeEmptyForm);
         setErrors({});
         setOpenForm(true);
     };
 
-    const handleEdit = (item: PositionItem) => {
+    const handleEdit = (item: EmployeeItem) => {
         form.setData({
             id: item.id,
-            name: item.name,
+            prefix_id: item.prefix_id,
+            position_id: item.position_id,
+            department_id: item.department_id,
+            code: item.code,
+            first_name: item.first_name,
+            last_name: item.last_name,
+            email: item.email,
+            phone: item.phone,
+            hire_date: item.hire_date,
+            termination_date: item.termination_date,
             is_active: item.is_active,
+            username: item.user?.username || '',
+            password: '',
         });
         setErrors({});
         setOpenForm(true);
     };
 
-    const handleDelete = (item: PositionItem) => {
+    const handleDelete = (item: EmployeeItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
     };
@@ -130,8 +141,19 @@ export default function PositionIndex({
         e.preventDefault();
 
         const payload = {
-            name: form.data.name,
+            prefix_id: form.data.prefix_id,
+            position_id: form.data.position_id,
+            department_id: form.data.department_id,
+            code: form.data.code,
+            first_name: form.data.first_name,
+            last_name: form.data.last_name,
+            email: form.data.email,
+            phone: form.data.phone,
+            hire_date: form.data.hire_date,
+            termination_date: form.data.termination_date,
             is_active: form.data.is_active,
+            username: form.data.username,
+            password: form.data.password,
         };
 
         setProcessing(true);
@@ -180,25 +202,25 @@ export default function PositionIndex({
 
     return (
         <>
-            <Head title={t('positions.title')} />
+            <Head title={t('employees.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <Heading
-                        title={t('positions.title')}
-                        description={t('positions.description')}
+                        title={t('employees.title')}
+                        description={t('employees.description')}
                     />
 
                     <Button onClick={handleCreate} className="w-full sm:w-fit">
                         <Plus />
-                        {t('positions.new')}
+                        {t('employees.new')}
                     </Button>
                 </div>
 
                 <div className="grid gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs md:grid-cols-3 lg:px-0 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
                     <Card size="sm">
                         <CardHeader>
-                            <CardTitle>{t('positions.total')}</CardTitle>
+                            <CardTitle>{t('employees.total')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-semibold">
@@ -206,8 +228,8 @@ export default function PositionIndex({
                             </div>
                             <p className="text-sm text-muted-foreground">
                                 {hasFilters
-                                    ? t('positions.matching_filters')
-                                    : t('positions.module_total')}
+                                    ? t('employees.matching_filters')
+                                    : t('employees.module_total')}
                             </p>
                         </CardContent>
                     </Card>
@@ -215,7 +237,7 @@ export default function PositionIndex({
                     <Card size="sm">
                         <CardHeader>
                             <CardTitle>
-                                {t('positions.active_on_page')}
+                                {t('employees.active_on_page')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -223,7 +245,7 @@ export default function PositionIndex({
                                 {activeCount}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {t('positions.active_card_description')}
+                                {t('employees.active_card_description')}
                             </p>
                         </CardContent>
                     </Card>
@@ -231,7 +253,7 @@ export default function PositionIndex({
                     <Card size="sm">
                         <CardHeader>
                             <CardTitle>
-                                {t('positions.inactive_on_page')}
+                                {t('employees.inactive_on_page')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -239,7 +261,7 @@ export default function PositionIndex({
                                 {inactiveCount}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {t('positions.inactive_card_description')}
+                                {t('employees.inactive_card_description')}
                             </p>
                         </CardContent>
                     </Card>
@@ -266,7 +288,7 @@ export default function PositionIndex({
                                     }
                                     className="pl-9"
                                     placeholder={t(
-                                        'positions.search_placeholder',
+                                        'employees.search_placeholder',
                                     )}
                                 />
                             </div>
@@ -341,9 +363,9 @@ export default function PositionIndex({
                     <CardHeader className="border-b py-4">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <CardTitle>{t('positions.title')}</CardTitle>
+                                <CardTitle>{t('employees.title')}</CardTitle>
                                 <p className="text-sm text-muted-foreground">
-                                    {t('positions.showing', {
+                                    {t('employees.showing', {
                                         from: items.from ?? 0,
                                         to: items.to ?? 0,
                                         total: items.total,
@@ -363,8 +385,8 @@ export default function PositionIndex({
                         <AppDataTable
                             columns={columns}
                             data={items.data}
-                            emptyDescription={t('positions.empty_description')}
-                            emptyTitle={t('positions.empty_title')}
+                            emptyDescription={t('employees.empty_description')}
+                            emptyTitle={t('employees.empty_title')}
                         />
                     </CardContent>
                 </Card>
@@ -375,28 +397,51 @@ export default function PositionIndex({
             <AppDialog
                 open={openForm}
                 onOpenChange={setOpenForm}
-                title={isEditing ? t('positions.edit') : t('positions.create')}
-                description={t('positions.dialog_description')}
+                title={isEditing ? t('employees.edit') : t('employees.create')}
+                description={t('employees.dialog_description')}
                 submitLabel={
-                    isEditing ? t('ui.save_changes') : t('positions.create')
+                    isEditing ? t('ui.save_changes') : t('employees.create')
                 }
                 processing={processing}
                 onSubmit={handleSubmit}
+                className="max-h-[150vh] overflow-y-auto sm:max-w-[1000px]"
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="position-name">
-                            {t('positions.name')}{' '}
+                    <Field data-invalid={!!errors.code}>
+                        <FieldLabel htmlFor="employee-code">
+                            {t('employees.code')}{' '}
                             <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
-                            id="position-name"
+                            id="employee-code"
+                            aria-invalid={!!errors.code}
+                            value={form.data.code}
+                            onChange={(e) =>
+                                form.setData('code', e.target.value)
+                            }
+                            placeholder={t('employees.placeholder_code')}
+                            autoFocus
+                        />
+                        {errors.code && (
+                            <FieldDescription className="text-destructive">
+                                {errors.code}
+                            </FieldDescription>
+                        )}
+                    </Field>
+
+                    <Field data-invalid={!!errors.name}>
+                        <FieldLabel htmlFor="employee-name">
+                            {t('employees.name')}{' '}
+                            <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                            id="employee-name"
                             aria-invalid={!!errors.name}
                             value={form.data.name}
                             onChange={(e) =>
                                 form.setData('name', e.target.value)
                             }
-                            placeholder={t('positions.placeholder_name')}
+                            placeholder={t('employees.placeholder_name')}
                             autoFocus
                         />
                         {errors.name && (
@@ -408,18 +453,18 @@ export default function PositionIndex({
 
                     <Field orientation="horizontal">
                         <Switch
-                            id="position-is-active"
+                            id="employee-is-active"
                             checked={form.data.is_active}
                             onCheckedChange={(checked) =>
                                 form.setData('is_active', checked)
                             }
                         />
                         <FieldContent>
-                            <FieldLabel htmlFor="position-is-active">
+                            <FieldLabel htmlFor="employee-is-active">
                                 {t('ui.active')}
                             </FieldLabel>
                             <FieldDescription>
-                                {t('positions.available_hint')}
+                                {t('employees.available_hint')}
                             </FieldDescription>
                         </FieldContent>
                     </Field>
@@ -433,10 +478,10 @@ export default function PositionIndex({
                             <Trash2 />
                         </AlertDialogMedia>
                         <AlertDialogTitle>
-                            {t('positions.delete_title')}
+                            {t('employees.delete_title')}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            {t('positions.delete_confirmation', {
+                            {t('employees.delete_confirmation', {
                                 name: selectedItem?.name ?? '',
                             })}
                         </AlertDialogDescription>
@@ -460,14 +505,14 @@ export default function PositionIndex({
     );
 }
 
-PositionIndex.layout = {
+EmployeeIndex.layout = {
     breadcrumbs: [
         {
             title: 'Dashboard',
             href: dashboard(),
         },
         {
-            title: 'Positions',
+            title: 'Employees',
             href: index(),
         },
     ],

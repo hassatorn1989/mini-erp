@@ -1,3 +1,4 @@
+import AppearanceSwitcher from '@/components/appearance-switcher';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import LanguageSwitcher from '@/components/language-switcher';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -15,7 +16,10 @@ export function AppSidebarHeader({
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
 
-            <LanguageSwitcher />
+            <div className="flex items-center gap-2">
+                <AppearanceSwitcher />
+                <LanguageSwitcher />
+            </div>
         </header>
     );
 }

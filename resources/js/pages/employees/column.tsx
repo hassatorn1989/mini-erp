@@ -10,11 +10,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { ItemCategoryItem } from './type';
+import type { EmployeeItem } from './type';
 
 type ColumnsProps = {
-    onEdit: (item: ItemCategoryItem) => void;
-    onDelete: (item: ItemCategoryItem) => void;
+    onEdit: (item: EmployeeItem) => void;
+    onDelete: (item: EmployeeItem) => void;
     t: (key: string) => string;
 };
 
@@ -22,43 +22,15 @@ export const getColumns = ({
     onEdit,
     onDelete,
     t,
-}: ColumnsProps): ColumnDef<ItemCategoryItem>[] => [
-    {
-        accessorKey: 'code',
-        header: t('item_categories.code'),
-        size: 10,
-        cell: ({ row }) => {
-            const code = row.getValue<string>('code');
-
-            return (
-                <span className="font-mono font-medium text-foreground">
-                    {code ?? '-'}
-                </span>
-            );
-        },
-    },
+}: ColumnsProps): ColumnDef<EmployeeItem>[] => [
     {
         accessorKey: 'name',
-        header: t('item_categories.name'),
-        size: 35,
+        header: t('employees.name'),
+        size: 45,
         cell: ({ row }) => {
-
             const name = row.getValue<string>('name');
-            const parent = row.original.parent;
 
-            return (
-                <>
-                    <span className="font-medium text-foreground">{name}</span>
-                    {parent && (
-                        <>
-                            <br />
-                            <span className="text-xs text-muted-foreground">
-                                {t('item_categories.parent_category')}: {parent.name}
-                            </span>
-                        </>
-                    )}
-                </>
-            );
+            return <span className="font-medium text-foreground">{name}</span>;
         },
     },
     {
@@ -73,7 +45,7 @@ export const getColumns = ({
     },
     {
         accessorKey: 'created_at',
-        header: t('item_categories.created_at'),
+        header: t('employees.created_at'),
         size: 25,
         cell: ({ row }) => {
             const createdAt = row.getValue<string>('created_at');

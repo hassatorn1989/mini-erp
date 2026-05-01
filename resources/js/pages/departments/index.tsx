@@ -45,7 +45,7 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import type { DepartmentItem, DepartmentFormState, DepartmentPaginate } from './type';
+import { type DepartmentItem, type DepartmentFormState, type DepartmentPaginate, emptyDepartmentForm } from './type';
 import { defaultFilters, Filters } from '@/types/default';
 
 export default function DepartmentIndex({
@@ -66,12 +66,7 @@ export default function DepartmentIndex({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const { t } = useTranslations();
 
-    const form = useForm<DepartmentFormState>({
-        id: null,
-        code: '',
-        name: '',
-        is_active: true,
-    });
+    const form = useForm<DepartmentFormState>(emptyDepartmentForm);
 
     const activeCount = items.data.filter((item) => item.is_active).length;
     const inactiveCount = items.data.length - activeCount;
@@ -104,12 +99,7 @@ export default function DepartmentIndex({
 
     const handleCreate = () => {
         form.reset();
-        form.setData({
-            id: null,
-            code: '',
-            name: '',
-            is_active: true,
-        });
+        form.setData(emptyDepartmentForm);
         setErrors({});
         setOpenForm(true);
     };

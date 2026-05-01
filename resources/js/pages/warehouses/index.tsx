@@ -45,10 +45,11 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import type {
-    WarehousePaginate,
-    WarehouseItem,
-    WarehouseFormState,
+import {
+    type WarehousePaginate,
+    type WarehouseItem,
+    type WarehouseFormState,
+    emptyWarehouseForm,
 } from './type';
 import { defaultFilters, Filters } from '@/types/default';
 
@@ -72,13 +73,7 @@ export default function WarehouseIndex({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const { t } = useTranslations();
 
-    const form = useForm<WarehouseFormState>({
-        id: null,
-        code: '',
-        name: '',
-        type: 'main',
-        is_active: true,
-    });
+    const form = useForm<WarehouseFormState>(emptyWarehouseForm);
 
     const activeCount = items.data.filter((item) => item.is_active).length;
     const inactiveCount = items.data.length - activeCount;
@@ -111,13 +106,7 @@ export default function WarehouseIndex({
 
     const handleCreate = () => {
         form.reset();
-        form.setData({
-            id: null,
-            code: '',
-            name: '',
-            type: 'main',
-            is_active: true,
-        });
+        form.setData(emptyWarehouseForm);
         setErrors({});
         setOpenForm(true);
     };

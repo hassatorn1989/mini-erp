@@ -1,4 +1,4 @@
-import type { PaginationLink } from "../prefixes/type";
+import type { PaginationLink } from "@/types/default";
 
 export type PositionItem = {
     id: string;
@@ -14,7 +14,7 @@ export type PositionFormState = {
 };
 
 
-export const emptyForm: PositionFormState = {
+export const emptyPositionForm: PositionFormState = {
     id: null,
     name: '',
     is_active: true,

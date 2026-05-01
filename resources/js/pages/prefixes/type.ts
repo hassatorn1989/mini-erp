@@ -14,7 +14,7 @@ export type PrefixFormState = {
     is_active: boolean;
 };
 
-export const emptyForm: PrefixFormState = {
+export const emptyPrefixForm: PrefixFormState = {
     id: null,
     name: '',
     is_active: true,

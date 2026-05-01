@@ -20,6 +20,7 @@ import { index as departmentIndex } from '@/actions/App/Http/Controllers/Departm
 import { index as positionIndex } from '@/actions/App/Http/Controllers/PositionController';
 import { index as warehouseIndex } from '@/actions/App/Http/Controllers/WarehouseController';
 import { index as itemCategoryIndex } from '@/actions/App/Http/Controllers/ItemCategoryController';
+import { index as employeeIndex } from '@/actions/App/Http/Controllers/EmployeeController';
 
 const mainNavItems: NavItem[] = [
     {
@@ -36,6 +37,14 @@ const settingsNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: 'Item Categories',
+        href: itemCategoryIndex(),
+        icon: LayoutGrid,
+    },
+];
+
+const hrNavItems: NavItem[] = [
+    {
         title: 'Prefixes',
         href: prefixIndex(),
         icon: LayoutGrid,
@@ -51,8 +60,8 @@ const settingsNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Item Categories',
-        href: itemCategoryIndex(),
+        title: 'Employees',
+        href: employeeIndex(),
         icon: LayoutGrid,
     },
 ];
@@ -88,6 +97,7 @@ export function AppSidebar() {
             <SidebarContent>
                 <NavMain items={mainNavItems} title="Main" />
                 <NavMain items={settingsNavItems} title="Settings" />
+                <NavMain items={hrNavItems} title="HR" />
             </SidebarContent>
 
             <SidebarFooter>

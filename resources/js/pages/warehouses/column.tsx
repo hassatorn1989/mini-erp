@@ -30,7 +30,11 @@ export const getColumns = ({
         cell: ({ row }) => {
             const code = row.getValue<string>('code');
 
-            return <span className="font-medium text-foreground">{code}</span>;
+            return (
+                <span className="font-mono font-medium text-foreground">
+                    {code ?? '-'}
+                </span>
+            );
         },
     },
     {

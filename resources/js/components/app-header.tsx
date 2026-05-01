@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
+import AppearanceSwitcher from '@/components/appearance-switcher';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import LanguageSwitcher from '@/components/language-switcher';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -178,6 +179,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <div className="ml-auto flex items-center space-x-2">
+                        <AppearanceSwitcher />
                         <LanguageSwitcher />
 
                         <div className="relative flex items-center space-x-1">

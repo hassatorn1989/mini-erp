@@ -45,7 +45,7 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import type { PrefixFormState, PrefixItem, PrefixPaginate } from './type';
+import { emptyPrefixForm, type PrefixFormState, type PrefixItem, type PrefixPaginate } from './type';
 import { defaultFilters, Filters } from '@/types/default';
 
 export default function PrefixIndex({
@@ -66,11 +66,7 @@ export default function PrefixIndex({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const { t } = useTranslations();
 
-    const form = useForm<PrefixFormState>({
-        id: null,
-        name: '',
-        is_active: true,
-    });
+    const form = useForm<PrefixFormState>(emptyPrefixForm);
 
     const activeCount = items.data.filter((item) => item.is_active).length;
     const inactiveCount = items.data.length - activeCount;
@@ -103,11 +99,7 @@ export default function PrefixIndex({
 
     const handleCreate = () => {
         form.reset();
-        form.setData({
-            id: null,
-            name: '',
-            is_active: true,
-        });
+        form.setData(emptyPrefixForm);
         setErrors({});
         setOpenForm(true);
     };
