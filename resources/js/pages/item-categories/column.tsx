@@ -24,13 +24,37 @@ export const getColumns = ({
     t,
 }: ColumnsProps): ColumnDef<ItemCategoryItem>[] => [
     {
-        accessorKey: 'name',
-        header: t('item_categories.itemcategory'),
-        size: 45,
+        accessorKey: 'code',
+        header: t('item_categories.code'),
+        size: 10,
         cell: ({ row }) => {
-            const name = row.getValue<string>('name');
+            const code = row.getValue<string>('code');
 
-            return <span className="font-medium text-foreground">{name}</span>;
+            return <span className="font-medium text-foreground">{code}</span>;
+        },
+    },
+    {
+        accessorKey: 'name',
+        header: t('item_categories.name'),
+        size: 35,
+        cell: ({ row }) => {
+
+            const name = row.getValue<string>('name');
+            const parent = row.original.parent;
+
+            return (
+                <>
+                    <span className="font-medium text-foreground">{name}</span>
+                    {parent && (
+                        <>
+                            <br />
+                            <span className="text-xs text-muted-foreground">
+                                {t('item_categories.parent_category')}: {parent.name}
+                            </span>
+                        </>
+                    )}
+                </>
+            );
         },
     },
     {

@@ -25,7 +25,7 @@ export const getColumns = ({
 }: ColumnsProps): ColumnDef<PositionItem>[] => [
     {
         accessorKey: 'name',
-        header: t('positions.position'),
+        header: t('positions.name'),
         size: 45,
         cell: ({ row }) => {
             const name = row.getValue<string>('name');

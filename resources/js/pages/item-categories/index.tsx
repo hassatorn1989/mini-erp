@@ -47,13 +47,20 @@ import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
 import { defaultFilters, Filters } from '@/types/default';
-import type { ItemCategoryFormState, ItemCategoryItem, ItemCategoryPaginate } from './type';
+import type {
+    ItemCategoryFormState,
+    ItemCategoryItem,
+    ItemCategoryPaginate,
+    ParentCategoryOption,
+} from './type';
 
 export default function ItemCategoryIndex({
     items,
+    parentCategories,
     filters,
 }: {
     items: ItemCategoryPaginate;
+    parentCategories: ParentCategoryOption[];
     filters: Filters;
 }) {
     const [openForm, setOpenForm] = useState(false);
@@ -71,6 +78,8 @@ export default function ItemCategoryIndex({
 
     const form = useForm<ItemCategoryFormState>({
         id: null,
+        parent_id: null,
+        code: '',
         name: '',
         is_active: true,
     });
@@ -118,9 +127,12 @@ export default function ItemCategoryIndex({
     const handleEdit = (item: ItemCategoryItem) => {
         form.setData({
             id: item.id,
+            code: item.code,
             name: item.name,
             is_active: item.is_active,
         });
+        // ห้ามเลือก parent_id ที่เป็นตัวเองหรือ child ของตัวเอง
+        form.setData('parent_id', item.parent_id || '');
         setErrors({});
         setOpenForm(true);
     };
@@ -140,6 +152,8 @@ export default function ItemCategoryIndex({
         e.preventDefault();
 
         const payload = {
+            parent_id: form.data.parent_id,
+            code: form.data.code,
             name: form.data.name,
             is_active: form.data.is_active,
         };
@@ -190,25 +204,25 @@ export default function ItemCategoryIndex({
 
     return (
         <>
-            <Head title={t('itemcategories.title')} />
+            <Head title={t('item_categories.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <Heading
-                        title={t('itemcategories.title')}
-                        description={t('itemcategories.description')}
+                        title={t('item_categories.title')}
+                        description={t('item_categories.description')}
                     />
 
                     <Button onClick={handleCreate} className="w-full sm:w-fit">
                         <Plus />
-                        {t('itemcategories.new')}
+                        {t('item_categories.new')}
                     </Button>
                 </div>
 
                 <div className="grid gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs md:grid-cols-3 lg:px-0 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
                     <Card size="sm">
                         <CardHeader>
-                            <CardTitle>{t('itemcategories.total')}</CardTitle>
+                            <CardTitle>{t('item_categories.total')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-semibold">
@@ -216,8 +230,8 @@ export default function ItemCategoryIndex({
                             </div>
                             <p className="text-sm text-muted-foreground">
                                 {hasFilters
-                                    ? t('itemcategories.matching_filters')
-                                    : t('itemcategories.module_total')}
+                                    ? t('item_categories.matching_filters')
+                                    : t('item_categories.module_total')}
                             </p>
                         </CardContent>
                     </Card>
@@ -225,7 +239,7 @@ export default function ItemCategoryIndex({
                     <Card size="sm">
                         <CardHeader>
                             <CardTitle>
-                                {t('itemcategories.active_on_page')}
+                                {t('item_categories.active_on_page')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -233,7 +247,7 @@ export default function ItemCategoryIndex({
                                 {activeCount}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {t('itemcategories.active_card_description')}
+                                {t('item_categories.active_card_description')}
                             </p>
                         </CardContent>
                     </Card>
@@ -241,7 +255,7 @@ export default function ItemCategoryIndex({
                     <Card size="sm">
                         <CardHeader>
                             <CardTitle>
-                                {t('itemcategories.inactive_on_page')}
+                                {t('item_categories.inactive_on_page')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -249,7 +263,7 @@ export default function ItemCategoryIndex({
                                 {inactiveCount}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {t('itemcategories.inactive_card_description')}
+                                {t('item_categories.inactive_card_description')}
                             </p>
                         </CardContent>
                     </Card>
@@ -276,7 +290,7 @@ export default function ItemCategoryIndex({
                                     }
                                     className="pl-9"
                                     placeholder={t(
-                                        'itemcategories.search_placeholder',
+                                        'item_categories.search_placeholder',
                                     )}
                                 />
                             </div>
@@ -352,10 +366,10 @@ export default function ItemCategoryIndex({
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <CardTitle>
-                                    {t('itemcategories.title')}
+                                    {t('item_categories.title')}
                                 </CardTitle>
                                 <p className="text-sm text-muted-foreground">
-                                    {t('itemcategories.showing', {
+                                    {t('item_categories.showing', {
                                         from: items.from ?? 0,
                                         to: items.to ?? 0,
                                         total: items.total,
@@ -376,9 +390,9 @@ export default function ItemCategoryIndex({
                             columns={columns}
                             data={items.data}
                             emptyDescription={t(
-                                'itemcategories.empty_description',
+                                'item_categories.empty_description',
                             )}
-                            emptyTitle={t('itemcategories.empty_title')}
+                            emptyTitle={t('item_categories.empty_title')}
                         />
                     </CardContent>
                 </Card>
@@ -391,32 +405,54 @@ export default function ItemCategoryIndex({
                 onOpenChange={setOpenForm}
                 title={
                     isEditing
-                        ? t('itemcategories.edit')
-                        : t('itemcategories.create')
+                        ? t('item_categories.edit')
+                        : t('item_categories.create')
                 }
-                description={t('itemcategories.dialog_description')}
+                description={t('item_categories.dialog_description')}
                 submitLabel={
                     isEditing
                         ? t('ui.save_changes')
-                        : t('itemcategories.create')
+                        : t('item_categories.create')
                 }
                 processing={processing}
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="itemcategory-name">
-                            {t('itemcategories.name')}{' '}
+                    <Field data-invalid={!!errors.code}>
+                        <FieldLabel htmlFor="item-category-code">
+                            {t('item_categories.code')}{' '}
                             <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
-                            id="itemcategory-name"
+                            id="item-category-code"
+                            aria-invalid={!!errors.code}
+                            value={form.data.code}
+                            onChange={(e) =>
+                                form.setData('code', e.target.value)
+                            }
+                            placeholder={t('item_categories.placeholder_code')}
+                            autoFocus
+                        />
+                        {errors.code && (
+                            <FieldDescription className="text-destructive">
+                                {errors.code}
+                            </FieldDescription>
+                        )}
+                    </Field>
+
+                    <Field data-invalid={!!errors.name}>
+                        <FieldLabel htmlFor="item-category-name">
+                            {t('item_categories.name')}{' '}
+                            <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                            id="item-category-name"
                             aria-invalid={!!errors.name}
                             value={form.data.name}
                             onChange={(e) =>
                                 form.setData('name', e.target.value)
                             }
-                            placeholder={t('itemcategories.placeholder_name')}
+                            placeholder={t('item_categories.placeholder_name')}
                             autoFocus
                         />
                         {errors.name && (
@@ -426,20 +462,67 @@ export default function ItemCategoryIndex({
                         )}
                     </Field>
 
+                    <Field data-invalid={!!errors.parent_id}>
+                        <FieldLabel htmlFor="item-category-parent_id">
+                            {t('item_categories.parent_category')}
+                        </FieldLabel>
+                        <Select
+                            id="item-category-parent_id"
+                            aria-invalid={!!errors.parent_id}
+                            value={form.data.parent_id || ''}
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'parent_id',
+                                    value === 'none' ? null : value,
+                                )
+                            }
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue
+                                    placeholder={t('item_categories.no_parent')}
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="none">
+                                    {t('item_categories.no_parent')}
+                                </SelectItem>
+                                {parentCategories
+                                    .filter((option) => {
+                                        // ห้ามเลือก parent_id ที่เป็นตัวเองหรือ child ของตัวเอง
+                                        if (form.data.id) {
+                                            if (option.id === form.data.id) {
+                                                return false;
+                                            }
+                                        }
+
+                                        return true;
+                                    })
+                                    .map((item) => (
+                                        <SelectItem
+                                            key={item.id}
+                                            value={item.id.toString()}
+                                        >
+                                            {item.name} ({item.code})
+                                        </SelectItem>
+                                    ))}
+                            </SelectContent>
+                        </Select>
+                    </Field>
+
                     <Field orientation="horizontal">
                         <Switch
-                            id="itemcategory-is-active"
+                            id="item-category-is-active"
                             checked={form.data.is_active}
                             onCheckedChange={(checked) =>
                                 form.setData('is_active', checked)
                             }
                         />
                         <FieldContent>
-                            <FieldLabel htmlFor="itemcategory-is-active">
+                            <FieldLabel htmlFor="item-category-is-active">
                                 {t('ui.active')}
                             </FieldLabel>
                             <FieldDescription>
-                                {t('itemcategories.available_hint')}
+                                {t('item_categories.available_hint')}
                             </FieldDescription>
                         </FieldContent>
                     </Field>
@@ -453,10 +536,10 @@ export default function ItemCategoryIndex({
                             <Trash2 />
                         </AlertDialogMedia>
                         <AlertDialogTitle>
-                            {t('itemcategories.delete_title')}
+                            {t('item_categories.delete_title')}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            {t('itemcategories.delete_confirmation', {
+                            {t('item_categories.delete_confirmation', {
                                 name: selectedItem?.name ?? '',
                             })}
                         </AlertDialogDescription>
@@ -487,7 +570,7 @@ ItemCategoryIndex.layout = {
             href: dashboard(),
         },
         {
-            title: 'Itemcategories',
+            title: 'Item Categories',
             href: index(),
         },
     ],

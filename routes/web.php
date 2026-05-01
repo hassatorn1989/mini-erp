@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PrefixController;
@@ -21,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('departments', DepartmentController::class);
     Route::resource('positions', PositionController::class);
     Route::resource('warehouses', WarehouseController::class);
+    Route::resource('item-categories', ItemCategoryController::class);
 });
 
 require __DIR__.'/settings.php';

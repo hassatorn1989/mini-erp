@@ -60,12 +60,12 @@ export const getColumns = ({
                 >
                     <span
                         className={`size-1.5 rounded-full ${
-                            type === 'main'
-                                ? 'bg-emerald-500'
-                                : 'bg-cyan-500'
+                            type === 'main' ? 'bg-emerald-500' : 'bg-cyan-500'
                         }`}
                     />
-                    {type === 'main' ? t('warehouses.types.main') : t('warehouses.types.third_party')}
+                    {type === 'main'
+                        ? t('warehouses.types.main')
+                        : t('warehouses.types.third_party')}
                 </span>
             );
         },

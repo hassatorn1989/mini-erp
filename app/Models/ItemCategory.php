@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -25,6 +26,16 @@ class ItemCategory extends BaseModel
             'updated_at' => 'datetime:Y-m-d H:i:s',
             'deleted_at' => 'datetime:Y-m-d H:i:s',
         ];
+    }
+
+    public function scopeIsActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeParentCategories(Builder $query): Builder
+    {
+        return $query->whereNull('parent_id');
     }
 
     public function parent()

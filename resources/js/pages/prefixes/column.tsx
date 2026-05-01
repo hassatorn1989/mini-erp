@@ -25,7 +25,7 @@ export const getColumns = ({
 }: ColumnsProps): ColumnDef<PrefixItem>[] => [
     {
         accessorKey: 'name',
-        header: t('prefixes.prefix'),
+        header: t('prefixes.name'),
         size: 45,
         cell: ({ row }) => {
             const name = row.getValue<string>('name');

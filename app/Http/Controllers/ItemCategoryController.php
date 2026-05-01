@@ -22,7 +22,7 @@ class ItemCategoryController extends Controller
 
         $perPage = (int) ($filters['per_page'] ?? 10);
 
-        $itemcategories = ItemCategory::query()
+        $itemCategories = ItemCategory::query()
             ->with('parent')
             ->when($filters['search'] ?? null, function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
@@ -32,14 +32,20 @@ class ItemCategoryController extends Controller
                         ->orWhere('description', 'like', "%{$search}%");
                 });
             })
-            ->when(($filters['status'] ?? null) === 'active', fn($query) => $query->where('is_active', true))
-            ->when(($filters['status'] ?? null) === 'inactive', fn($query) => $query->where('is_active', false))
+            ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->where('is_active', true))
+            ->when(($filters['status'] ?? null) === 'inactive', fn ($query) => $query->where('is_active', false))
             ->latest()
             ->paginate($perPage)
             ->withQueryString();
 
+        $parentCategories = ItemCategory::query()
+            ->isActive()
+            ->parentCategories()
+            ->get();
+
         return Inertia::render('item-categories/index', [
-            'items' => $itemcategories,
+            'items' => $itemCategories,
+            'parentCategories' => $parentCategories,
             'filters' => [
                 'search' => $filters['search'] ?? '',
                 'status' => $filters['status'] ?? '',
@@ -62,28 +68,28 @@ class ItemCategoryController extends Controller
             ->with('success', trans('messages.created'));
     }
 
-    public function show(ItemCategory $itemcategory): RedirectResponse
+    public function show(ItemCategory $item_category): RedirectResponse
     {
         return redirect()->route('item-categories.index');
     }
 
-    public function edit(ItemCategory $itemcategory): RedirectResponse
+    public function edit(ItemCategory $item_category): RedirectResponse
     {
         return redirect()->route('item-categories.index');
     }
 
-    public function update(UpdateItemCategoryRequest $request, ItemCategory $itemcategory): RedirectResponse
+    public function update(UpdateItemCategoryRequest $request, ItemCategory $item_category): RedirectResponse
     {
-        $itemcategory->update($request->validated());
+        $item_category->update($request->validated());
 
         return redirect()
             ->route('item-categories.index')
             ->with('success', trans('messages.updated'));
     }
 
-    public function destroy(ItemCategory $itemcategory): RedirectResponse
+    public function destroy(ItemCategory $item_category): RedirectResponse
     {
-        $itemcategory->delete();
+        $item_category->delete();
 
         return redirect()
             ->route('item-categories.index')

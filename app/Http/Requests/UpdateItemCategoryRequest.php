@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\ItemCategory;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateItemCategoryRequest extends FormRequest
 {
@@ -22,10 +24,22 @@ class UpdateItemCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
+        /** @var ItemCategory|string|null $itemCategory */
+        $itemCategoryId = is_string($this->route('item_category')) ? null : $this->route('item_category')->id;
+
         return [
-            'code' => ['required', 'string', 'max:255', 'unique:item_categories,code' . ($this->itemcategory ? ',' . $this->itemcategory->id : '')],
-            'name' => ['required', 'string', 'max:255', 'unique:item_categories,name' . ($this->itemcategory ? ',' . $this->itemcategory->id : '')],
-            'parent_id' => ['nullable', 'exists:item_categories,id'],
+            'code' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('item_categories', 'code')->ignore($itemCategoryId),
+            ],
+            'name' => ['required', 'string', 'max:255'],
+            'parent_id' => [
+                'nullable',
+                'exists:item_categories,id',
+                Rule::notIn(array_filter([$itemCategoryId])),
+            ],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

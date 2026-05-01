@@ -45,6 +45,7 @@ class HandleInertiaRequests extends Middleware
             'availableLocales' => config('app.supported_locales'),
             'translations' => [
                 'messages' => trans('messages'),
+                'item_categories' => trans('item_categories'),
                 'warehouses' => trans('warehouses'),
                 'prefixes' => trans('prefixes'),
                 'departments' => trans('departments'),

@@ -19,6 +19,7 @@ import { index as prefixIndex } from '@/actions/App/Http/Controllers/PrefixContr
 import { index as departmentIndex } from '@/actions/App/Http/Controllers/DepartmentController';
 import { index as positionIndex } from '@/actions/App/Http/Controllers/PositionController';
 import { index as warehouseIndex } from '@/actions/App/Http/Controllers/WarehouseController';
+import { index as itemCategoryIndex } from '@/actions/App/Http/Controllers/ItemCategoryController';
 
 const mainNavItems: NavItem[] = [
     {
@@ -47,6 +48,11 @@ const settingsNavItems: NavItem[] = [
     {
         title: 'Positions',
         href: positionIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Item Categories',
+        href: itemCategoryIndex(),
         icon: LayoutGrid,
     },
 ];
