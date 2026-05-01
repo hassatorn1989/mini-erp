@@ -45,20 +45,15 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import type { Filters, PaginatedPositions, PositionFormState, PositionItem } from './type';
+import type { PositionPaginate, PositionFormState, PositionItem } from './type';
+import { defaultFilters, Filters } from '@/types/default';
 
-
-const defaultFilters: Filters = {
-    search: '',
-    status: '',
-    per_page: 10,
-};
 
 export default function PositionIndex({
     items,
     filters,
 }: {
-    items: PaginatedPositions;
+    items: PositionPaginate;
     filters: Filters;
 }) {
     const [openForm, setOpenForm] = useState(false);

@@ -45,19 +45,14 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import type { Filters, PaginatedDepartments, DepartmentItem, DepartmentFormState } from './type';
-
-const defaultFilters: Filters = {
-    search: '',
-    status: '',
-    per_page: 10,
-};
+import type { DepartmentItem, DepartmentFormState, DepartmentPaginate } from './type';
+import { defaultFilters, Filters } from '@/types/default';
 
 export default function DepartmentIndex({
     items,
     filters,
 }: {
-    items: PaginatedDepartments;
+    items: DepartmentPaginate;
     filters: Filters;
 }) {
     const [openForm, setOpenForm] = useState(false);

@@ -13,7 +13,7 @@ export type PaginationLink = {
     active: boolean;
 };
 
-export type PaginatedWarehouses = {
+export type WarehousePaginate = {
     data: WarehouseItem[];
     links: PaginationLink[];
     from: number | null;

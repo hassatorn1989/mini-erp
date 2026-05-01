@@ -12,18 +12,12 @@ export type PaginationLink = {
     active: boolean;
 };
 
-export type PaginatedDepartments = {
+export type DepartmentPaginate = {
     data: DepartmentItem[];
     links: PaginationLink[];
     from: number | null;
     to: number | null;
     total: number;
-};
-
-export type Filters = {
-    search: string;
-    status: string;
-    per_page: number;
 };
 
 export type DepartmentFormState = {

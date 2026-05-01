@@ -11,18 +11,12 @@ export type PaginationLink = {
     active: boolean;
 };
 
-export type PaginatedPositions = {
+export type PositionPaginate = {
     data: PositionItem[];
     links: PaginationLink[];
     from: number | null;
     to: number | null;
     total: number;
-};
-
-export type Filters = {
-    search: string;
-    status: string;
-    per_page: number;
 };
 
 export type PositionFormState = {

@@ -1,4 +1,4 @@
-export type PrefixItem = {
+export type ItemCategoryItem = {
     id: string;
     name: string;
     is_active: boolean;
@@ -11,23 +11,21 @@ export type PaginationLink = {
     active: boolean;
 };
 
-export type PrefixPaginate = {
-    data: PrefixItem[];
+export type ItemCategoryPaginate = {
+    data: ItemCategoryItem[];
     links: PaginationLink[];
     from: number | null;
     to: number | null;
     total: number;
 };
 
-
-export type PrefixFormState = {
+export type ItemCategoryFormState = {
     id?: string | null;
     name: string;
     is_active: boolean;
 };
 
-
-export const emptyForm: PrefixFormState = {
+export const emptyForm: ItemCategoryFormState = {
     id: null,
     name: '',
     is_active: true,

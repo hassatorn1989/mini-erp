@@ -45,20 +45,14 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import type { Filters, PaginatedPrefixes, PrefixFormState, PrefixItem } from './type';
-
-
-const defaultFilters: Filters = {
-    search: '',
-    status: '',
-    per_page: 10,
-};
+import type { PrefixFormState, PrefixItem, PrefixPaginate } from './type';
+import { defaultFilters, Filters } from '@/types/default';
 
 export default function PrefixIndex({
     items,
     filters,
 }: {
-    items: PaginatedPrefixes;
+    items: PrefixPaginate;
     filters: Filters;
 }) {
     const [openForm, setOpenForm] = useState(false);
