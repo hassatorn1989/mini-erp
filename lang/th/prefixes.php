@@ -24,7 +24,7 @@ return [
     'module_total' => 'ข้อมูลทั้งหมดในโมดูลนี้',
     'name' => 'คำนำหน้า',
     'new' => 'เพิ่มคำนำหน้า',
-    'placeholder' => 'เช่น นาย, นาง, ดร.',
+    'placeholder_name' => 'เช่น นาย, นาง, ดร.',
     'prefix' => 'คำนำหน้า',
     'search_placeholder' => 'ค้นหาคำนำหน้า',
     'showing' => 'แสดง :from-:to จาก :total รายการ',

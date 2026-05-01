@@ -1,5 +1,6 @@
-export type PrefixItem = {
+export type DepartmentItem = {
     id: string;
+    code: string;
     name: string;
     is_active: boolean;
     created_at: string | null;
@@ -11,8 +12,8 @@ export type PaginationLink = {
     active: boolean;
 };
 
-export type PaginatedPrefixes = {
-    data: PrefixItem[];
+export type PaginatedDepartments = {
+    data: DepartmentItem[];
     links: PaginationLink[];
     from: number | null;
     to: number | null;
@@ -25,15 +26,16 @@ export type Filters = {
     per_page: number;
 };
 
-export type PrefixFormState = {
+export type DepartmentFormState = {
     id?: string | null;
+    code: string;
     name: string;
     is_active: boolean;
 };
 
-
-export const emptyForm: PrefixFormState = {
+export const emptyForm: DepartmentFormState = {
     id: null,
+    code: '',
     name: '',
     is_active: true,
 };

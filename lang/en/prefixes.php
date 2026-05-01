@@ -24,7 +24,7 @@ return [
     'module_total' => 'All records in this module',
     'name' => 'Prefix name',
     'new' => 'New prefix',
-    'placeholder' => 'e.g. Mr., Mrs., Dr.',
+    'placeholder_name' => 'e.g. Mr., Mrs., Dr.',
     'prefix' => 'Prefix',
     'search_placeholder' => 'Search prefix name',
     'showing' => 'Showing :from-:to of :total records',

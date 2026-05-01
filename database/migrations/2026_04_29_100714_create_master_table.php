@@ -34,10 +34,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('code')->unique();
             $table->string('name');
-            $table->text('address')->nullable();
-            $table->string('contact_name')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('email')->nullable()->index();
+            $table->enum('type', ['main', 'third_party'])->default('main')->index();
             $table->auditFields(true, true);
         });
 
@@ -45,21 +42,18 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('code')->unique();
             $table->string('name');
-            $table->text('description')->nullable();
             $table->auditFields(true, true);
         });
 
         Schema::create('positions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->text('description')->nullable();
             $table->auditFields(true, true);
         });
 
         Schema::create('prefixes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name')->unique();
-            $table->string('description')->nullable();
             $table->auditFields(true, true);
         });
 
@@ -121,7 +115,6 @@ return new class extends Migration
 
             $table->string('code')->nullable()->unique();
             $table->string('name');
-            $table->text('description')->nullable();
             $table->auditFields(true, true);
 
             $table->index(['parent_id', 'is_active']);

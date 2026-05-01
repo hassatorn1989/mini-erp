@@ -1,4 +1,4 @@
-export type PrefixItem = {
+export type PositionItem = {
     id: string;
     name: string;
     is_active: boolean;
@@ -11,8 +11,8 @@ export type PaginationLink = {
     active: boolean;
 };
 
-export type PaginatedPrefixes = {
-    data: PrefixItem[];
+export type PaginatedPositions = {
+    data: PositionItem[];
     links: PaginationLink[];
     from: number | null;
     to: number | null;
@@ -25,14 +25,14 @@ export type Filters = {
     per_page: number;
 };
 
-export type PrefixFormState = {
+export type PositionFormState = {
     id?: string | null;
     name: string;
     is_active: boolean;
 };
 
 
-export const emptyForm: PrefixFormState = {
+export const emptyForm: PositionFormState = {
     id: null,
     name: '',
     is_active: true,

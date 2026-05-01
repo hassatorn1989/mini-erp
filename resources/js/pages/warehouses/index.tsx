@@ -7,7 +7,7 @@ import {
     index,
     store,
     update,
-} from '@/actions/App/Http/Controllers/PrefixController';
+} from '@/actions/App/Http/Controllers/WarehouseController';
 import Heading from '@/components/heading';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
@@ -45,8 +45,12 @@ import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
-import type { Filters, PaginatedPrefixes, PrefixFormState, PrefixItem } from './type';
-
+import type {
+    Filters,
+    PaginatedWarehouses,
+    WarehouseItem,
+    WarehouseFormState,
+} from './type';
 
 const defaultFilters: Filters = {
     search: '',
@@ -54,16 +58,18 @@ const defaultFilters: Filters = {
     per_page: 10,
 };
 
-export default function PrefixIndex({
+export default function WarehouseIndex({
     items,
     filters,
 }: {
-    items: PaginatedPrefixes;
+    items: PaginatedWarehouses;
     filters: Filters;
 }) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<PrefixItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<WarehouseItem | null>(
+        null,
+    );
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
@@ -72,9 +78,11 @@ export default function PrefixIndex({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const { t } = useTranslations();
 
-    const form = useForm<PrefixFormState>({
+    const form = useForm<WarehouseFormState>({
         id: null,
+        code: '',
         name: '',
+        type: 'main',
         is_active: true,
     });
 
@@ -111,24 +119,28 @@ export default function PrefixIndex({
         form.reset();
         form.setData({
             id: null,
+            code: '',
             name: '',
+            type: 'main',
             is_active: true,
         });
         setErrors({});
         setOpenForm(true);
     };
 
-    const handleEdit = (item: PrefixItem) => {
+    const handleEdit = (item: WarehouseItem) => {
         form.setData({
             id: item.id,
+            code: item.code,
             name: item.name,
+            type: item.type,
             is_active: item.is_active,
         });
         setErrors({});
         setOpenForm(true);
     };
 
-    const handleDelete = (item: PrefixItem) => {
+    const handleDelete = (item: WarehouseItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
     };
@@ -143,7 +155,9 @@ export default function PrefixIndex({
         e.preventDefault();
 
         const payload = {
+            code: form.data.code,
             name: form.data.name,
+            type: form.data.type,
             is_active: form.data.is_active,
         };
 
@@ -193,25 +207,25 @@ export default function PrefixIndex({
 
     return (
         <>
-            <Head title={t('prefixes.title')} />
+            <Head title={t('warehouses.title')} />
 
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <Heading
-                        title={t('prefixes.title')}
-                        description={t('prefixes.description')}
+                        title={t('warehouses.title')}
+                        description={t('warehouses.description')}
                     />
 
                     <Button onClick={handleCreate} className="w-full sm:w-fit">
                         <Plus />
-                        {t('prefixes.new')}
+                        {t('warehouses.new')}
                     </Button>
                 </div>
 
                 <div className="grid gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs md:grid-cols-3 lg:px-0 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
                     <Card size="sm">
                         <CardHeader>
-                            <CardTitle>{t('prefixes.total')}</CardTitle>
+                            <CardTitle>{t('warehouses.total')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-semibold">
@@ -219,8 +233,8 @@ export default function PrefixIndex({
                             </div>
                             <p className="text-sm text-muted-foreground">
                                 {hasFilters
-                                    ? t('prefixes.matching_filters')
-                                    : t('prefixes.module_total')}
+                                    ? t('warehouses.matching_filters')
+                                    : t('warehouses.module_total')}
                             </p>
                         </CardContent>
                     </Card>
@@ -228,7 +242,7 @@ export default function PrefixIndex({
                     <Card size="sm">
                         <CardHeader>
                             <CardTitle>
-                                {t('prefixes.active_on_page')}
+                                {t('warehouses.active_on_page')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -236,7 +250,7 @@ export default function PrefixIndex({
                                 {activeCount}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {t('prefixes.active_card_description')}
+                                {t('warehouses.active_card_description')}
                             </p>
                         </CardContent>
                     </Card>
@@ -244,7 +258,7 @@ export default function PrefixIndex({
                     <Card size="sm">
                         <CardHeader>
                             <CardTitle>
-                                {t('prefixes.inactive_on_page')}
+                                {t('warehouses.inactive_on_page')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -252,7 +266,7 @@ export default function PrefixIndex({
                                 {inactiveCount}
                             </div>
                             <p className="text-sm text-muted-foreground">
-                                {t('prefixes.inactive_card_description')}
+                                {t('warehouses.inactive_card_description')}
                             </p>
                         </CardContent>
                     </Card>
@@ -279,7 +293,7 @@ export default function PrefixIndex({
                                     }
                                     className="pl-9"
                                     placeholder={t(
-                                        'prefixes.search_placeholder',
+                                        'warehouses.search_placeholder',
                                     )}
                                 />
                             </div>
@@ -354,9 +368,9 @@ export default function PrefixIndex({
                     <CardHeader className="border-b py-4">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <CardTitle>{t('prefixes.title')}</CardTitle>
+                                <CardTitle>{t('warehouses.title')}</CardTitle>
                                 <p className="text-sm text-muted-foreground">
-                                    {t('prefixes.showing', {
+                                    {t('warehouses.showing', {
                                         from: items.from ?? 0,
                                         to: items.to ?? 0,
                                         total: items.total,
@@ -376,8 +390,8 @@ export default function PrefixIndex({
                         <AppDataTable
                             columns={columns}
                             data={items.data}
-                            emptyDescription={t('prefixes.empty_description')}
-                            emptyTitle={t('prefixes.empty_title')}
+                            emptyDescription={t('warehouses.empty_description')}
+                            emptyTitle={t('warehouses.empty_title')}
                         />
                     </CardContent>
                 </Card>
@@ -388,28 +402,50 @@ export default function PrefixIndex({
             <AppDialog
                 open={openForm}
                 onOpenChange={setOpenForm}
-                title={isEditing ? t('prefixes.edit') : t('prefixes.create')}
-                description={t('prefixes.dialog_description')}
+                title={
+                    isEditing ? t('warehouses.edit') : t('warehouses.create')
+                }
+                description={t('warehouses.dialog_description')}
                 submitLabel={
-                    isEditing ? t('ui.save_changes') : t('prefixes.create')
+                    isEditing ? t('ui.save_changes') : t('warehouses.create')
                 }
                 processing={processing}
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="prefix-name">
-                            {t('prefixes.name')}{' '}
+                    <Field data-invalid={!!errors.code}>
+                        <FieldLabel htmlFor="warehouse-code">
+                            {t('warehouses.code')}{' '}
                             <span className="text-destructive">*</span>
                         </FieldLabel>
                         <Input
-                            id="prefix-name"
+                            id="warehouse-code"
+                            aria-invalid={!!errors.code}
+                            value={form.data.code}
+                            onChange={(e) =>
+                                form.setData('code', e.target.value)
+                            }
+                            placeholder={t('warehouses.placeholder_code')}
+                        />
+                        {errors.code && (
+                            <FieldDescription className="text-destructive">
+                                {errors.code}
+                            </FieldDescription>
+                        )}
+                    </Field>
+                    <Field data-invalid={!!errors.name}>
+                        <FieldLabel htmlFor="warehouse-name">
+                            {t('warehouses.name')}{' '}
+                            <span className="text-destructive">*</span>
+                        </FieldLabel>
+                        <Input
+                            id="warehouse-name"
                             aria-invalid={!!errors.name}
                             value={form.data.name}
                             onChange={(e) =>
                                 form.setData('name', e.target.value)
                             }
-                            placeholder={t('prefixes.placeholder_name')}
+                            placeholder={t('warehouses.placeholder_name')}
                             autoFocus
                         />
                         {errors.name && (
@@ -418,21 +454,51 @@ export default function PrefixIndex({
                             </FieldDescription>
                         )}
                     </Field>
+                    <Field>
+                        <FieldLabel htmlFor="warehouse-type">
+                            {t('warehouses.type')}
+                        </FieldLabel>
+                        <Select
+                            id="warehouse-type"
+                            value={form.data.type}
+                            onValueChange={(value) => {
+                                console.log(value);
+                                form.setData(
+                                    'type',
+                                    value as WarehouseFormState['type'],
+                                );
+                            }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue
+                                    placeholder={t('warehouses.type')}
+                                />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="main">
+                                    {t('warehouses.types.main')}
+                                </SelectItem>
+                                <SelectItem value="third_party">
+                                    {t('warehouses.types.third_party')}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </Field>
 
                     <Field orientation="horizontal">
                         <Switch
-                            id="prefix-is-active"
+                            id="warehouse-is-active"
                             checked={form.data.is_active}
                             onCheckedChange={(checked) =>
                                 form.setData('is_active', checked)
                             }
                         />
                         <FieldContent>
-                            <FieldLabel htmlFor="prefix-is-active">
+                            <FieldLabel htmlFor="warehouse-is-active">
                                 {t('ui.active')}
                             </FieldLabel>
                             <FieldDescription>
-                                {t('prefixes.available_hint')}
+                                {t('warehouses.available_hint')}
                             </FieldDescription>
                         </FieldContent>
                     </Field>
@@ -446,10 +512,10 @@ export default function PrefixIndex({
                             <Trash2 />
                         </AlertDialogMedia>
                         <AlertDialogTitle>
-                            {t('prefixes.delete_title')}
+                            {t('warehouses.delete_title')}
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            {t('prefixes.delete_confirmation', {
+                            {t('warehouses.delete_confirmation', {
                                 name: selectedItem?.name ?? '',
                             })}
                         </AlertDialogDescription>
@@ -473,14 +539,14 @@ export default function PrefixIndex({
     );
 }
 
-PrefixIndex.layout = {
+WarehouseIndex.layout = {
     breadcrumbs: [
         {
             title: 'Dashboard',
             href: dashboard(),
         },
         {
-            title: 'Prefixes',
+            title: 'Warehouses',
             href: index(),
         },
     ],

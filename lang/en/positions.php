@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'active_card_description' => 'Ready for selection in forms',
+    'active_on_page' => 'Active on this page',
+    'available_hint' => 'Active positiones are available for users when creating records.',
+    'create' => 'Create position',
+    'created_at' => 'Created At',
+    'delete_confirmation' => 'This will permanently delete :name. This action cannot be undone.',
+    'delete_title' => 'Delete position?',
+    'description' => 'Manage customer and contact name positiones used across the system.',
+    'dialog_description' => 'Keep the position short and recognizable so it is easy to scan in forms and reports.',
+    'edit' => 'Edit position',
+    'empty_description' => 'Try changing your filters or create a new position.',
+    'empty_title' => 'No positiones found',
+    'fields' => [
+        'description' => 'description',
+        'is_active' => 'status',
+        'name' => 'position name',
+    ],
+    'inactive_card_description' => 'Hidden from day-to-day use',
+    'inactive_on_page' => 'Inactive on this page',
+    'matching_filters' => 'Matching current filters',
+    'module_total' => 'All records in this module',
+    'name' => 'Position name',
+    'new' => 'New position',
+    'placeholder_name' => 'e.g. Staff, Manager, Executive',
+    'position' => 'Position',
+    'search_placeholder' => 'Search position name',
+    'showing' => 'Showing :from-:to of :total records',
+    'title' => 'Positions',
+    'total' => 'Total positions',
+];

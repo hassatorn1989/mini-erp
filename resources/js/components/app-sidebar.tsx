@@ -16,6 +16,9 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import { index as prefixIndex } from '@/actions/App/Http/Controllers/PrefixController';
+import { index as departmentIndex } from '@/actions/App/Http/Controllers/DepartmentController';
+import { index as positionIndex } from '@/actions/App/Http/Controllers/PositionController';
+import { index as warehouseIndex } from '@/actions/App/Http/Controllers/WarehouseController';
 
 const mainNavItems: NavItem[] = [
     {
@@ -27,8 +30,23 @@ const mainNavItems: NavItem[] = [
 
 const settingsNavItems: NavItem[] = [
     {
+        title: 'Warehouses',
+        href: warehouseIndex(),
+        icon: LayoutGrid,
+    },
+    {
         title: 'Prefixes',
         href: prefixIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Departments',
+        href: departmentIndex(),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Positions',
+        href: positionIndex(),
         icon: LayoutGrid,
     },
 ];

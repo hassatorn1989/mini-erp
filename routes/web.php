@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\PositionController;
 use App\Http\Controllers\PrefixController;
+use App\Http\Controllers\WarehouseController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -15,6 +18,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
     Route::resource('prefixes', PrefixController::class);
+    Route::resource('departments', DepartmentController::class);
+    Route::resource('positions', PositionController::class);
+    Route::resource('warehouses', WarehouseController::class);
 });
 
 require __DIR__.'/settings.php';
