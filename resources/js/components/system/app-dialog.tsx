@@ -57,7 +57,10 @@ export function AppDialog({
                         )}
                     </DialogHeader>
 
-                    <div className="space-y-4">{children}</div>
+                    {/* <div className="space-y-4"> */}
+                    <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
+                        {children}
+                    </div>
 
                     <DialogFooter>
                         <DialogClose asChild>

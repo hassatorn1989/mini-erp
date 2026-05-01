@@ -15,3 +15,8 @@ export const defaultFilters: Filters = {
     status: '',
     per_page: 10,
 };
+
+export type defaultOptions = {
+    value: number | string;
+    label: string;
+};

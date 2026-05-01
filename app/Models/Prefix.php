@@ -26,4 +26,14 @@ class Prefix extends BaseModel
             'deleted_at' => 'datetime:Y-m-d H:i:s',
         ];
     }
+
+    function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
 }

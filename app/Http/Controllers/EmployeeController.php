@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
+use App\Models\Prefix;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -43,8 +44,28 @@ class EmployeeController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
+        $prefixOptions = Prefix::query()->active()->get(['id', 'name'])->map(fn ($prefix) => [
+            'value' => $prefix->id,
+            'label' => $prefix->name,
+        ]);
+
+        $departmentOptions = Employee::query()->with('department:id,name')->get()->pluck('department')->unique('id')->map(fn ($department) => [
+            'value' => $department->id,
+            'label' => $department->name,
+        ]);
+
+
+        $positionOptions = Employee::query()->with('position:id,name')->get()->pluck('position')->unique('id')->map(fn ($position) => [
+            'value' => $position->id,
+            'label' => $position->name,
+        ]);
+
+
         return Inertia::render('employees/index', [
             'items' => $employees,
+            'prefixOptions' => $prefixOptions,
+            'departmentOptions' => $departmentOptions,
+            'positionOptions' => $positionOptions,
             'filters' => [
                 'search' => $filters['search'] ?? '',
                 'status' => $filters['status'] ?? '',
