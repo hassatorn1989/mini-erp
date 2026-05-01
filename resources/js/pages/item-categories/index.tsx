@@ -2,6 +2,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { Filter, Plus, Search, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+// eslint-disable-next-line import/order
 import {
     destroy,
     index,

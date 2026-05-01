@@ -1,3 +1,5 @@
+import type { PaginationLink } from "@/types/default";
+
 export type WarehouseItem = {
     id: string;
     code: string;
@@ -5,20 +7,6 @@ export type WarehouseItem = {
     type: 'main' | 'third_party';
     is_active: boolean;
     created_at: string | null;
-};
-
-export type PaginationLink = {
-    url: string | null;
-    label: string;
-    active: boolean;
-};
-
-export type WarehousePaginate = {
-    data: WarehouseItem[];
-    links: PaginationLink[];
-    from: number | null;
-    to: number | null;
-    total: number;
 };
 
 export type Filters = {
@@ -41,4 +29,12 @@ export const emptyForm: WarehouseFormState = {
     name: '',
     type: 'main',
     is_active: true,
+};
+
+export type WarehousePaginate = {
+    data: WarehouseItem[];
+    links: PaginationLink[];
+    from: number | null;
+    to: number | null;
+    total: number;
 };
