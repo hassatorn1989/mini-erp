@@ -9,44 +9,26 @@ import {
     update,
 } from '@/actions/App/Http/Controllers/PrefixController';
 import Heading from '@/components/heading';
+import AppConfirm from '@/components/system/app-confirm';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
+import AppInput from '@/components/system/app-input';
 import { AppPagination } from '@/components/system/app-pagination';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogMedia,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import AppSelect from '@/components/system/app-select';
+import AppSwitch from '@/components/system/app-switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Field,
-    FieldContent,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { FieldGroup } from '@/components/ui/field';
+import { defaultPerPage, perPages, statusActiveOptions } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
+import { defaultFilters } from '@/types/default';
+import type { Filters } from '@/types/default';
 import { getColumns } from './column';
-import { emptyPrefixForm, type PrefixFormState, type PrefixItem, type PrefixPaginate } from './type';
-import { defaultFilters, Filters } from '@/types/default';
+import { emptyPrefixForm } from './type';
+import type { PrefixFormState, PrefixItem, PrefixPaginate } from './type';
+import FilterForm from './filter_form';
 
 export default function PrefixIndex({
     items,
@@ -104,6 +86,10 @@ export default function PrefixIndex({
         setOpenForm(true);
     };
 
+    // console.log(statusActiveOptions.map((status) => ({
+    // value: status,
+    // label: t(`ui.${status}_statuses`),
+    // })));
     const handleEdit = (item: PrefixItem) => {
         form.setData({
             id: item.id,
@@ -244,97 +230,33 @@ export default function PrefixIndex({
                     </Card>
                 </div>
 
-                <Card className="gap-3 py-3">
-                    <CardContent>
-                        <form
-                            className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_12rem_11rem_auto_auto]"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                submitFilters();
-                            }}
-                        >
-                            <div className="relative">
-                                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    value={filterValues.search}
-                                    onChange={(e) =>
-                                        setFilterValues((current) => ({
-                                            ...current,
-                                            search: e.target.value,
-                                        }))
-                                    }
-                                    className="pl-9"
-                                    placeholder={t(
-                                        'prefixes.search_placeholder',
-                                    )}
-                                />
-                            </div>
-
-                            <Select
-                                value={filterValues.status || 'all'}
-                                onValueChange={(value) =>
-                                    setFilterValues((prev) => ({
-                                        ...prev,
-                                        status: value === 'all' ? '' : value,
-                                    }))
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder={t('ui.status')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">
-                                        {t('ui.all_statuses')}
-                                    </SelectItem>
-                                    <SelectItem value="active">
-                                        {t('ui.active')}
-                                    </SelectItem>
-                                    <SelectItem value="inactive">
-                                        {t('ui.inactive')}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Select
-                                value={filterValues.per_page.toString()}
-                                onValueChange={(value) =>
-                                    setFilterValues((prev) => ({
-                                        ...prev,
-                                        per_page: Number(value),
-                                    }))
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder={t('ui.rows')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {[10, 15, 25, 50].map((size) => (
-                                        <SelectItem
-                                            key={size}
-                                            value={size.toString()}
-                                        >
-                                            {size} {t('ui.rows')}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
-                            <Button type="submit" variant="secondary">
-                                <Filter className="size-4" />
-                                {t('ui.apply')}
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={resetFilters}
-                            >
-                                <X className="size-4" />
-                                {t('ui.reset')}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+                <FilterForm
+                    // filter={{
+                    //     value: filterValues,
+                    //     setValue: {
+                    //         search: (value: string) =>
+                    //             setFilterValues((current) => ({
+                    //                 ...current,
+                    //                 search: value,
+                    //             })),
+                    //         status: (value: string) =>
+                    //             setFilterValues((current) => ({
+                    //                 ...current,
+                    //                 status: value,
+                    //             })),
+                    //         per_page: (value: number) =>
+                    //             setFilterValues((current) => ({
+                    //                 ...current,
+                    //                 per_page: value,
+                    //             })),
+                    //     },
+                    // }}
+                    submitFilters={(e) => {
+                        e.preventDefault();
+                        submitFilters();
+                    }}
+                    resetFilters={resetFilters}
+                />
 
                 <Card className="gap-0 py-0">
                     <CardHeader className="border-b py-4">
@@ -383,78 +305,42 @@ export default function PrefixIndex({
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="prefix-name">
-                            {t('prefixes.name')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="prefix-name"
-                            aria-invalid={!!errors.name}
-                            value={form.data.name}
-                            onChange={(e) =>
-                                form.setData('name', e.target.value)
-                            }
-                            placeholder={t('prefixes.placeholder_name')}
-                            autoFocus
-                        />
-                        {errors.name && (
-                            <FieldDescription className="text-destructive">
-                                {errors.name}
-                            </FieldDescription>
-                        )}
-                    </Field>
+                    <AppInput
+                        type="text"
+                        label={t('prefixes.name')}
+                        value={form.data.name}
+                        onChange={(value) => form.setData('name', value)}
+                        error={errors.name}
+                        placeholder={t('prefixes.placeholder_name')}
+                        isRequired={true}
+                    />
 
-                    <Field orientation="horizontal">
-                        <Switch
-                            id="prefix-is-active"
-                            checked={form.data.is_active}
-                            onCheckedChange={(checked) =>
-                                form.setData('is_active', checked)
-                            }
-                        />
-                        <FieldContent>
-                            <FieldLabel htmlFor="prefix-is-active">
-                                {t('ui.active')}
-                            </FieldLabel>
-                            <FieldDescription>
-                                {t('prefixes.available_hint')}
-                            </FieldDescription>
-                        </FieldContent>
-                    </Field>
+                    <AppSwitch
+                        label={t('ui.active')}
+                        checked={form.data.is_active}
+                        onCheckedChange={(checked) =>
+                            form.setData('is_active', checked)
+                        }
+                    />
                 </FieldGroup>
             </AppDialog>
 
-            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                            <Trash2 />
-                        </AlertDialogMedia>
-                        <AlertDialogTitle>
-                            {t('prefixes.delete_title')}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('prefixes.delete_confirmation', {
-                                name: selectedItem?.name ?? '',
-                            })}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={processing}>
-                            {t('ui.cancel')}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            disabled={processing}
-                            onClick={confirmDelete}
-                        >
-                            <Trash2 />
-                            {t('ui.delete')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <AppConfirm
+                icon={<Trash2 />}
+                title={t('prefixes.delete_title')}
+                description={t('prefixes.delete_confirmation', {
+                    name: selectedItem?.name ?? '',
+                })}
+                openDialog={{ open: openDelete, setOpen: setOpenDelete }}
+                disable={processing}
+                onClick={confirmDelete}
+                buttonLabel={
+                    <>
+                        <Trash2 />
+                        {t('ui.delete')}
+                    </>
+                }
+            />
         </>
     );
 }

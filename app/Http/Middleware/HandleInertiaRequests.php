@@ -50,6 +50,7 @@ class HandleInertiaRequests extends Middleware
                 'prefixes' => trans('prefixes'),
                 'departments' => trans('departments'),
                 'positions' => trans('positions'),
+                'employees' => trans('employees'),
                 'ui' => trans('ui'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

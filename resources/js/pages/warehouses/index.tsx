@@ -11,7 +11,9 @@ import {
 import Heading from '@/components/heading';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
+import AppInput from '@/components/system/app-input';
 import { AppPagination } from '@/components/system/app-pagination';
+import AppSelect from '@/components/system/app-select';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -44,14 +46,26 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
+import type { Filters } from '@/types/default';
+import { defaultFilters } from '@/types/default';
 import { getColumns } from './column';
 import {
-    type WarehousePaginate,
-    type WarehouseItem,
-    type WarehouseFormState,
-    emptyWarehouseForm,
+    emptyWarehouseForm
 } from './type';
-import { defaultFilters, Filters } from '@/types/default';
+import type {WarehousePaginate, WarehouseItem, WarehouseFormState} from './type';
+import AppSwitch from '@/components/system/app-switch';
+import AppConfirm from '@/components/system/app-confirm';
+
+const optionTypes = [
+    {
+        value: 'main',
+        label: 'Main Warehouse',
+    },
+    {
+        value: 'third_party',
+        label: 'Third Party Warehouse',
+    },
+];
 
 export default function WarehouseIndex({
     items,
@@ -396,128 +410,64 @@ export default function WarehouseIndex({
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.code}>
-                        <FieldLabel htmlFor="warehouse-code">
-                            {t('warehouses.code')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="warehouse-code"
-                            aria-invalid={!!errors.code}
-                            value={form.data.code}
-                            onChange={(e) =>
-                                form.setData('code', e.target.value)
-                            }
-                            placeholder={t('warehouses.placeholder_code')}
-                        />
-                        {errors.code && (
-                            <FieldDescription className="text-destructive">
-                                {errors.code}
-                            </FieldDescription>
-                        )}
-                    </Field>
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="warehouse-name">
-                            {t('warehouses.name')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="warehouse-name"
-                            aria-invalid={!!errors.name}
-                            value={form.data.name}
-                            onChange={(e) =>
-                                form.setData('name', e.target.value)
-                            }
-                            placeholder={t('warehouses.placeholder_name')}
-                            autoFocus
-                        />
-                        {errors.name && (
-                            <FieldDescription className="text-destructive">
-                                {errors.name}
-                            </FieldDescription>
-                        )}
-                    </Field>
-                    <Field>
-                        <FieldLabel htmlFor="warehouse-type">
-                            {t('warehouses.type')}
-                        </FieldLabel>
-                        <Select
-                            id="warehouse-type"
-                            value={form.data.type}
-                            onValueChange={(value) => {
-                                console.log(value);
-                                form.setData(
-                                    'type',
-                                    value as WarehouseFormState['type'],
-                                );
-                            }}
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue
-                                    placeholder={t('warehouses.type')}
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="main">
-                                    {t('warehouses.types.main')}
-                                </SelectItem>
-                                <SelectItem value="third_party">
-                                    {t('warehouses.types.third_party')}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </Field>
+                    <AppInput
+                        type="text"
+                        label={t('warehouses.code')}
+                        value={form.data.code}
+                        onChange={(value) => form.setData('code', value)}
+                        error={errors.code}
+                        placeholder={t('warehouses.placeholder_code')}
+                        isRequired
+                    />
+                    <AppInput
+                        type="text"
+                        label={t('warehouses.name')}
+                        value={form.data.name}
+                        onChange={(value) => form.setData('name', value)}
+                        error={errors.name}
+                        placeholder={t('warehouses.placeholder_name')}
+                        isRequired
+                    />
 
-                    <Field orientation="horizontal">
-                        <Switch
-                            id="warehouse-is-active"
-                            checked={form.data.is_active}
-                            onCheckedChange={(checked) =>
-                                form.setData('is_active', checked)
-                            }
-                        />
-                        <FieldContent>
-                            <FieldLabel htmlFor="warehouse-is-active">
-                                {t('ui.active')}
-                            </FieldLabel>
-                            <FieldDescription>
-                                {t('warehouses.available_hint')}
-                            </FieldDescription>
-                        </FieldContent>
-                    </Field>
+                    <AppSelect
+                        label={t('warehouses.type')}
+                        value={form.data.type}
+                        onChange={(value) =>
+                            form.setData(
+                                'type',
+                                value as WarehouseFormState['type'],
+                            )
+                        }
+                        options={optionTypes}
+                        placeholder={t('warehouses.placeholder_type')}
+                    />
+
+                    <AppSwitch
+                        label={t('ui.active')}
+                        checked={form.data.is_active}
+                        onCheckedChange={(checked) =>
+                            form.setData('is_active', checked)
+                        }
+                    />
                 </FieldGroup>
             </AppDialog>
 
-            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                            <Trash2 />
-                        </AlertDialogMedia>
-                        <AlertDialogTitle>
-                            {t('warehouses.delete_title')}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('warehouses.delete_confirmation', {
-                                name: selectedItem?.name ?? '',
-                            })}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={processing}>
-                            {t('ui.cancel')}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            disabled={processing}
-                            onClick={confirmDelete}
-                        >
-                            <Trash2 />
-                            {t('ui.delete')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <AppConfirm
+                icon={<Trash2 />}
+                title={t('warehouses.delete_title')}
+                description={t('warehouses.delete_confirmation', {
+                    name: selectedItem?.name ?? '',
+                })}
+                openDialog={{ open: openDelete, setOpen: setOpenDelete }}
+                disable={processing}
+                onClick={confirmDelete}
+                buttonLabel={
+                    <>
+                        <Trash2 />
+                        {t('ui.delete')}
+                    </>
+                }
+            />
         </>
     );
 }

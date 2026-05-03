@@ -47,7 +47,12 @@ export function AppDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className={`${className}`}>
+            <DialogContent
+                className={`${className}`}
+                onInteractOutside={(event) => {
+                    event.preventDefault();
+                }}
+            >
                 <form onSubmit={onSubmit} className="space-y-5">
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>

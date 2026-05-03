@@ -9,29 +9,17 @@ import {
     update,
 } from '@/actions/App/Http/Controllers/PositionController';
 import Heading from '@/components/heading';
+import AppConfirm from '@/components/system/app-confirm';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
+import AppInput from '@/components/system/app-input';
 import { AppPagination } from '@/components/system/app-pagination';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogMedia,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import AppSwitch from '@/components/system/app-switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    Field,
-    FieldContent,
-    FieldDescription,
     FieldGroup,
-    FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -41,13 +29,15 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
+import { defaultFilters } from '@/types/default';
+import type { Filters } from '@/types/default';
 import { getColumns } from './column';
-import { type PositionPaginate, type PositionFormState, type PositionItem, emptyPositionForm } from './type';
-import { defaultFilters, Filters } from '@/types/default';
-
+import {
+    emptyPositionForm
+} from './type';
+import type {PositionPaginate, PositionFormState, PositionItem} from './type';
 
 export default function PositionIndex({
     items,
@@ -384,78 +374,41 @@ export default function PositionIndex({
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="position-name">
-                            {t('positions.name')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="position-name"
-                            aria-invalid={!!errors.name}
-                            value={form.data.name}
-                            onChange={(e) =>
-                                form.setData('name', e.target.value)
-                            }
-                            placeholder={t('positions.placeholder_name')}
-                            autoFocus
-                        />
-                        {errors.name && (
-                            <FieldDescription className="text-destructive">
-                                {errors.name}
-                            </FieldDescription>
-                        )}
-                    </Field>
-
-                    <Field orientation="horizontal">
-                        <Switch
-                            id="position-is-active"
-                            checked={form.data.is_active}
-                            onCheckedChange={(checked) =>
-                                form.setData('is_active', checked)
-                            }
-                        />
-                        <FieldContent>
-                            <FieldLabel htmlFor="position-is-active">
-                                {t('ui.active')}
-                            </FieldLabel>
-                            <FieldDescription>
-                                {t('positions.available_hint')}
-                            </FieldDescription>
-                        </FieldContent>
-                    </Field>
+                    <AppInput
+                        type="text"
+                        label={t('positions.name')}
+                        error={errors.name}
+                        value={form.data.name}
+                        onChange={(value) => form.setData('name', value)}
+                        placeholder={t('positions.placeholder_name')}
+                        isRequired
+                    />
+                    <AppSwitch
+                        label={t('ui.active')}
+                        // description={t('positions.available_hint')}
+                        checked={form.data.is_active}
+                        onCheckedChange={(checked) =>
+                            form.setData('is_active', checked)
+                        }
+                    />
                 </FieldGroup>
             </AppDialog>
-
-            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                            <Trash2 />
-                        </AlertDialogMedia>
-                        <AlertDialogTitle>
-                            {t('positions.delete_title')}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('positions.delete_confirmation', {
-                                name: selectedItem?.name ?? '',
-                            })}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={processing}>
-                            {t('ui.cancel')}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            disabled={processing}
-                            onClick={confirmDelete}
-                        >
-                            <Trash2 />
-                            {t('ui.delete')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <AppConfirm
+                icon={<Trash2 />}
+                title={t('positions.delete_title')}
+                description={t('positions.delete_confirmation', {
+                    name: selectedItem?.name ?? '',
+                })}
+                openDialog={{ open: openDelete, setOpen: setOpenDelete }}
+                disable={processing}
+                onClick={confirmDelete}
+                buttonLabel={
+                    <>
+                        <Trash2 />
+                        {t('ui.delete')}
+                    </>
+                }
+            />
         </>
     );
 }

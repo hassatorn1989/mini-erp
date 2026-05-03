@@ -47,6 +47,9 @@ import { dashboard } from '@/routes';
 import { getColumns } from './column';
 import { type DepartmentItem, type DepartmentFormState, type DepartmentPaginate, emptyDepartmentForm } from './type';
 import { defaultFilters, Filters } from '@/types/default';
+import AppInput from '@/components/system/app-input';
+import AppSwitch from '@/components/system/app-switch';
+import AppConfirm from '@/components/system/app-confirm';
 
 export default function DepartmentIndex({
     items,
@@ -364,7 +367,9 @@ export default function DepartmentIndex({
                         <AppDataTable
                             columns={columns}
                             data={items.data}
-                            emptyDescription={t('departments.empty_description')}
+                            emptyDescription={t(
+                                'departments.empty_description',
+                            )}
                             emptyTitle={t('departments.empty_title')}
                         />
                     </CardContent>
@@ -376,7 +381,9 @@ export default function DepartmentIndex({
             <AppDialog
                 open={openForm}
                 onOpenChange={setOpenForm}
-                title={isEditing ? t('departments.edit') : t('departments.create')}
+                title={
+                    isEditing ? t('departments.edit') : t('departments.create')
+                }
                 description={t('departments.dialog_description')}
                 submitLabel={
                     isEditing ? t('ui.save_changes') : t('departments.create')
@@ -385,98 +392,51 @@ export default function DepartmentIndex({
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.code}>
-                        <FieldLabel htmlFor="department-code">
-                            {t('departments.code')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="department-code"
-                            aria-invalid={!!errors.code}
-                            value={form.data.code}
-                            onChange={(e) =>
-                                form.setData('code', e.target.value)
-                            }
-                            placeholder={t('departments.placeholder_code')}
-                        />
-                        {errors.code && (
-                            <FieldDescription className="text-destructive">
-                                {errors.code}
-                            </FieldDescription>
-                        )}
-                    </Field>
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="department-name">
-                            {t('departments.name')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="department-name"
-                            aria-invalid={!!errors.name}
-                            value={form.data.name}
-                            onChange={(e) =>
-                                form.setData('name', e.target.value)
-                            }
-                            placeholder={t('departments.placeholder_name')}
-                            autoFocus
-                        />
-                        {errors.name && (
-                            <FieldDescription className="text-destructive">
-                                {errors.name}
-                            </FieldDescription>
-                        )}
-                    </Field>
-
-                    <Field orientation="horizontal">
-                        <Switch
-                            id="department-is-active"
-                            checked={form.data.is_active}
-                            onCheckedChange={(checked) =>
-                                form.setData('is_active', checked)
-                            }
-                        />
-                        <FieldContent>
-                            <FieldLabel htmlFor="department-is-active">
-                                {t('ui.active')}
-                            </FieldLabel>
-                            <FieldDescription>
-                                {t('departments.available_hint')}
-                            </FieldDescription>
-                        </FieldContent>
-                    </Field>
+                    <AppInput
+                        type="text"
+                        label={t('departments.code')}
+                        value={form.data.code}
+                        onChange={(value) => form.setData('code', value)}
+                        error={errors.code}
+                        placeholder={t('departments.placeholder_code')}
+                        isRequired
+                    />
+                    <AppInput
+                        type="text"
+                        label={t('departments.name')}
+                        value={form.data.name}
+                        onChange={(value) => form.setData('name', value)}
+                        error={errors.name}
+                        placeholder={t('departments.placeholder_name')}
+                        isRequired
+                    />
+                    <AppSwitch
+                        label={t('ui.active')}
+                        description={t('departments.available_hint')}
+                        checked={form.data.is_active}
+                        onCheckedChange={(checked) =>
+                            form.setData('is_active', checked)
+                        }
+                    />
                 </FieldGroup>
             </AppDialog>
 
-            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                            <Trash2 />
-                        </AlertDialogMedia>
-                        <AlertDialogTitle>
-                            {t('departments.delete_title')}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('departments.delete_confirmation', {
-                                name: selectedItem?.name ?? '',
-                            })}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={processing}>
-                            {t('ui.cancel')}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            disabled={processing}
-                            onClick={confirmDelete}
-                        >
-                            <Trash2 />
-                            {t('ui.delete')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <AppConfirm
+                icon={<Trash2 />}
+                title={t('departments.delete_title')}
+                description={t('departments.delete_confirmation', {
+                    name: selectedItem?.name ?? '',
+                })}
+                openDialog={{ open: openDelete, setOpen: setOpenDelete }}
+                disable={processing}
+                onClick={confirmDelete}
+                buttonLabel={
+                    <>
+                        <Trash2 />
+                        {t('ui.delete')}
+                    </>
+                }
+            />
         </>
     );
 }

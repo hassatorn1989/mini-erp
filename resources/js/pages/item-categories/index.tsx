@@ -12,7 +12,9 @@ import {
 import Heading from '@/components/heading';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
+import AppInput from '@/components/system/app-input';
 import { AppPagination } from '@/components/system/app-pagination';
+import AppSelect from '@/components/system/app-select';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -30,7 +32,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Field,
     FieldContent,
-    FieldDescription,
     FieldGroup,
     FieldLabel,
 } from '@/components/ui/field';
@@ -45,15 +46,15 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
+import type { Filters } from '@/types/default';
+import { defaultFilters } from '@/types/default';
 import { getColumns } from './column';
-import { defaultFilters, Filters } from '@/types/default';
 import {
-    emptyItemCategoryForm,
-    type ItemCategoryFormState,
-    type ItemCategoryItem,
-    type ItemCategoryPaginate,
-    type ParentCategoryOption,
+    emptyItemCategoryForm
 } from './type';
+import type {ItemCategoryFormState, ItemCategoryItem, ItemCategoryPaginate, ParentCategoryOption} from './type';
+import AppSwitch from '@/components/system/app-switch';
+import AppConfirm from '@/components/system/app-confirm';
 
 export default function ItemCategoryIndex({
     items,
@@ -409,147 +410,80 @@ export default function ItemCategoryIndex({
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
-                    <Field data-invalid={!!errors.code}>
-                        <FieldLabel htmlFor="item-category-code">
-                            {t('item_categories.code')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="item-category-code"
-                            aria-invalid={!!errors.code}
-                            value={form.data.code}
-                            onChange={(e) =>
-                                form.setData('code', e.target.value)
-                            }
-                            placeholder={t('item_categories.placeholder_code')}
-                            autoFocus
-                        />
-                        {errors.code && (
-                            <FieldDescription className="text-destructive">
-                                {errors.code}
-                            </FieldDescription>
-                        )}
-                    </Field>
+                    <AppInput
+                        type="text"
+                        label={t('item_categories.code')}
+                        value={form.data.code}
+                        onChange={(value) => form.setData('code', value)}
+                        error={errors.code}
+                        placeholder={t('item_categories.placeholder_code')}
+                        isRequired={true}
+                    />
 
-                    <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="item-category-name">
-                            {t('item_categories.name')}{' '}
-                            <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <Input
-                            id="item-category-name"
-                            aria-invalid={!!errors.name}
-                            value={form.data.name}
-                            onChange={(e) =>
-                                form.setData('name', e.target.value)
-                            }
-                            placeholder={t('item_categories.placeholder_name')}
-                            autoFocus
-                        />
-                        {errors.name && (
-                            <FieldDescription className="text-destructive">
-                                {errors.name}
-                            </FieldDescription>
-                        )}
-                    </Field>
-
-                    <Field data-invalid={!!errors.parent_id}>
-                        <FieldLabel htmlFor="item-category-parent_id">
-                            {t('item_categories.parent_category')}
-                        </FieldLabel>
-                        <Select
-                            id="item-category-parent_id"
-                            aria-invalid={!!errors.parent_id}
-                            value={form.data.parent_id || ''}
-                            onValueChange={(value) =>
-                                form.setData(
-                                    'parent_id',
-                                    value === 'none' ? null : value,
+                    <AppInput
+                        type="text"
+                        label={t('item_categories.name')}
+                        value={form.data.name}
+                        onChange={(value) => form.setData('name', value)}
+                        error={errors.name}
+                        placeholder={t('item_categories.placeholder_name')}
+                        isRequired={true}
+                    />
+                    <AppSelect
+                        label={t('item_categories.parent_category')}
+                        value={form.data.parent_id || ''}
+                        onChange={(value) =>
+                            form.setData(
+                                'parent_id',
+                                value === 'none' ? null : value,
+                            )
+                        }
+                        error={errors.parent_id}
+                        placeholder={t('item_categories.no_parent')}
+                        options={[
+                            {
+                                value: 'none',
+                                label: t('item_categories.no_parent'),
+                            },
+                            ...parentCategories
+                                .filter(
+                                    (option) =>
+                                        !form.data.id ||
+                                        option.id !== form.data.id,
                                 )
-                            }
-                        >
-                            <SelectTrigger className="w-full">
-                                <SelectValue
-                                    placeholder={t('item_categories.no_parent')}
-                                />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="none">
-                                    {t('item_categories.no_parent')}
-                                </SelectItem>
-                                {parentCategories
-                                    .filter((option) => {
-                                        // ห้ามเลือก parent_id ที่เป็นตัวเองหรือ child ของตัวเอง
-                                        if (form.data.id) {
-                                            if (option.id === form.data.id) {
-                                                return false;
-                                            }
-                                        }
-
-                                        return true;
-                                    })
-                                    .map((item) => (
-                                        <SelectItem
-                                            key={item.id}
-                                            value={item.id.toString()}
-                                        >
-                                            {item.name} ({item.code})
-                                        </SelectItem>
-                                    ))}
-                            </SelectContent>
-                        </Select>
-                    </Field>
-
-                    <Field orientation="horizontal">
-                        <Switch
-                            id="item-category-is-active"
-                            checked={form.data.is_active}
-                            onCheckedChange={(checked) =>
-                                form.setData('is_active', checked)
-                            }
-                        />
-                        <FieldContent>
-                            <FieldLabel htmlFor="item-category-is-active">
-                                {t('ui.active')}
-                            </FieldLabel>
-                            <FieldDescription>
-                                {t('item_categories.available_hint')}
-                            </FieldDescription>
-                        </FieldContent>
-                    </Field>
+                                .map((item) => ({
+                                    value: item.id.toString(),
+                                    label: `${item.name} (${item.code})`,
+                                })),
+                        ]}
+                    />
+                    <AppSwitch
+                        label={t('ui.active')}
+                        description={t('item_categories.active_hint')}
+                        checked={form.data.is_active}
+                        onCheckedChange={(checked) =>
+                            form.setData('is_active', checked)
+                        }
+                    />
                 </FieldGroup>
             </AppDialog>
 
-            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                            <Trash2 />
-                        </AlertDialogMedia>
-                        <AlertDialogTitle>
-                            {t('item_categories.delete_title')}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('item_categories.delete_confirmation', {
-                                name: selectedItem?.name ?? '',
-                            })}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={processing}>
-                            {t('ui.cancel')}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            disabled={processing}
-                            onClick={confirmDelete}
-                        >
-                            <Trash2 />
-                            {t('ui.delete')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <AppConfirm
+                icon={<Trash2 />}
+                title={t('item_categories.delete_title')}
+                description={t('item_categories.delete_confirmation', {
+                    name: selectedItem?.name ?? '',
+                })}
+                openDialog={{ open: openDelete, setOpen: setOpenDelete }}
+                disable={processing}
+                onClick={confirmDelete}
+                buttonLabel={
+                    <>
+                        <Trash2 />
+                        {t('ui.delete')}
+                    </>
+                }
+            />
         </>
     );
 }

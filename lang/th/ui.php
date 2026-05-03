@@ -3,6 +3,8 @@
 return [
     'active' => 'ใช้งาน',
     'all_statuses' => 'ทุกสถานะ',
+    'active_statuses' => 'ใช้งาน',
+    'inactive_statuses' => 'ไม่ใช้งาน',
     'apply' => 'ค้นหา',
     'cancel' => 'ยกเลิก',
     'create' => 'สร้าง',
@@ -24,4 +26,5 @@ return [
     'status' => 'สถานะ',
     'system' => 'ตามระบบ',
     'theme' => 'ธีม',
+    'please_select' => 'กรุณาเลือก',
 ];

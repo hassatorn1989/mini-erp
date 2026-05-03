@@ -41,7 +41,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import { getColumns } from './column';
@@ -52,6 +51,10 @@ import {
     employeeEmptyForm,
 } from './type';
 import { defaultFilters, defaultOptions, Filters } from '@/types/default';
+import AppInput from '@/components/system/app-input';
+import AppSelect from '@/components/system/app-select';
+import { Switch } from '@/components/ui/switch';
+import AppConfirm from '@/components/system/app-confirm';
 
 export default function EmployeeIndex({
     items,
@@ -414,349 +417,146 @@ export default function EmployeeIndex({
                 }
                 processing={processing}
                 onSubmit={handleSubmit}
-                className="max-h-[150vh] overflow-y-auto sm:max-w-[700px]"
+                className="w-full sm:max-w-[700px]"
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.prefix')}</FieldLabel>
-                            <FieldContent>
-                                <Select
-                                    value={form.data.prefix_id || ''}
-                                    onValueChange={(value) =>
-                                        form.setData('prefix_id', value)
-                                    }
-                                    disabled={processing}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue
-                                            placeholder={
-                                                '-- ' +
-                                                t('ui.no_prefix') +
-                                                ' --'
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {prefixOptions.map((option) => (
-                                            <SelectItem
-                                                key={option.value}
-                                                value={option.value.toString()}
-                                            >
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.prefix_id && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.prefix_id}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
+                        <AppInput
+                            type="text"
+                            label={t('employees.code')}
+                            value={form.data.code}
+                            onChange={(value) => form.setData('code', value)}
+                            disabled={processing}
+                            error={errors.code}
+                        />
                     </FieldGroup>
 
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.position')}</FieldLabel>
-                            <FieldContent>
-                                <Select
-                                    value={form.data.position_id || ''}
-                                    onValueChange={(value) =>
-                                        form.setData('position_id', value)
-                                    }
-                                    disabled={processing}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue
-                                            placeholder={
-                                                '-- ' +
-                                                t('ui.no_position') +
-                                                ' --'
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {positionOptions.map((option) => (
-                                            <SelectItem
-                                                key={option.value}
-                                                value={option.value.toString()}
-                                            >
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.position_id && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.position_id}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
+                    <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <AppSelect
+                            label={t('employees.prefix')}
+                            value={form.data.prefix_id || ''}
+                            onChange={(value) =>
+                                form.setData('prefix_id', value)
+                            }
+                            disabled={processing}
+                            error={errors.prefix_id}
+                            options={prefixOptions}
+                            placeholder={t('ui.please_select')}
+                        />
+                        <AppInput
+                            type="text"
+                            label={t('employees.first_name')}
+                            value={form.data.first_name}
+                            onChange={(value) =>
+                                form.setData('first_name', value)
+                            }
+                            disabled={processing}
+                            error={errors.first_name}
+                        />
+
+                        <AppInput
+                            type="text"
+                            label={t('employees.last_name')}
+                            value={form.data.last_name}
+                            onChange={(value) =>
+                                form.setData('last_name', value)
+                            }
+                            disabled={processing}
+                            error={errors.last_name}
+                        />
                     </FieldGroup>
 
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.department')}</FieldLabel>
-                            <FieldContent>
-                                <Select
-                                    value={form.data.department_id || ''}
-                                    onValueChange={(value) =>
-                                        form.setData('department_id', value)
-                                    }
-                                    disabled={processing}
-                                >
-                                    <SelectTrigger className="w-full">
-                                        <SelectValue
-                                            placeholder={
-                                                '-- ' +
-                                                t('ui.no_department') +
-                                                ' --'
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {departmentOptions.map((option) => (
-                                            <SelectItem
-                                                key={option.value}
-                                                value={option.value.toString()}
-                                            >
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.department_id && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.department_id}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
+                    <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AppSelect
+                            label={t('employees.department')}
+                            value={form.data.department_id || ''}
+                            onChange={(value) =>
+                                form.setData('department_id', value)
+                            }
+                            disabled={processing}
+                            error={errors.department_id}
+                            options={departmentOptions}
+                            placeholder={t('ui.please_select')}
+                        />
+
+                        <AppSelect
+                            label={t('employees.position')}
+                            value={form.data.position_id || ''}
+                            onChange={(value) =>
+                                form.setData('position_id', value)
+                            }
+                            disabled={processing}
+                            error={errors.position_id}
+                            options={positionOptions}
+                            placeholder={t('ui.please_select')}
+                        />
                     </FieldGroup>
 
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.code')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    value={form.data.code}
-                                    onChange={(e) =>
-                                        form.setData('code', e.target.value)
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.code && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.code}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
+                    <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AppInput
+                            type="email"
+                            label={t('employees.email')}
+                            value={form.data.email}
+                            onChange={(value) => form.setData('email', value)}
+                            disabled={processing}
+                            error={errors.email}
+                        />
+                        <AppInput
+                            type="text"
+                            label={t('employees.phone')}
+                            value={form.data.phone}
+                            onChange={(value) => form.setData('phone', value)}
+                            disabled={processing}
+                            error={errors.phone}
+                        />
                     </FieldGroup>
 
-                    <FieldGroup className="grid grid-cols-2 gap-4">
-                        <Field>
-                            <FieldLabel>{t('employees.first_name')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    value={form.data.first_name}
-                                    onChange={(e) =>
-                                        form.setData(
-                                            'first_name',
-                                            e.target.value,
-                                        )
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.first_name && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.first_name}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
+                    <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AppInput
+                            type="date"
+                            label={t('employees.hire_date')}
+                            value={form.data.hire_date}
+                            onChange={(value) =>
+                                form.setData('hire_date', value)
+                            }
+                            disabled={processing}
+                            error={errors.hire_date}
+                        />
 
-                        <Field>
-                            <FieldLabel>{t('employees.last_name')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    value={form.data.last_name}
-                                    onChange={(e) =>
-                                        form.setData(
-                                            'last_name',
-                                            e.target.value,
-                                        )
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.last_name && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.last_name}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
+                        <AppInput
+                            type="date"
+                            label={t('employees.termination_date')}
+                            value={form.data.termination_date}
+                            onChange={(value) =>
+                                form.setData('termination_date', value)
+                            }
+                            disabled={processing}
+                            error={errors.termination_date}
+                        />
                     </FieldGroup>
 
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.email')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    type="email"
-                                    value={form.data.email}
-                                    onChange={(e) =>
-                                        form.setData('email', e.target.value)
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.email && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.email}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
+                    <FieldGroup className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <AppInput
+                            type="text"
+                            label={t('employees.username')}
+                            value={form.data.username}
+                            onChange={(value) =>
+                                form.setData('username', value)
+                            }
+                            disabled={processing}
+                            error={errors.username}
+                        />
+                        <AppInput
+                            type="password"
+                            label={t('employees.password')}
+                            value={form.data.password}
+                            onChange={(value) =>
+                                form.setData('password', value)
+                            }
+                            disabled={processing}
+                            error={errors.password}
+                        />
                     </FieldGroup>
-
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.phone')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    value={form.data.phone}
-                                    onChange={(e) =>
-                                        form.setData('phone', e.target.value)
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.phone && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.phone}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
-                    </FieldGroup>
-
-                    <FieldGroup className="grid grid-cols-2 gap-4">
-                        <Field>
-                            <FieldLabel>{t('employees.hire_date')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    type="date"
-                                    value={form.data.hire_date}
-                                    onChange={(e) =>
-                                        form.setData(
-                                            'hire_date',
-                                            e.target.value,
-                                        )
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.hire_date && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.hire_date}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
-
-                        <Field>
-                            <FieldLabel>
-                                {t('employees.termination_date')}
-                            </FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    type="date"
-                                    value={form.data.termination_date}
-                                    onChange={(e) =>
-                                        form.setData(
-                                            'termination_date',
-                                            e.target.value,
-                                        )
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.termination_date && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.termination_date}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
-                    </FieldGroup>
-
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.username')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    value={form.data.username}
-                                    onChange={(e) =>
-                                        form.setData('username', e.target.value)
-                                    }
-                                    disabled={processing}
-                                />
-                                {errors.username && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.username}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
-                    </FieldGroup>
-
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>{t('employees.password')}</FieldLabel>
-                            <FieldContent>
-                                <Input
-                                    type="password"
-                                    value={form.data.password}
-                                    onChange={(e) =>
-                                        form.setData('password', e.target.value)
-                                    }
-                                    disabled={processing}
-                                    placeholder={
-                                        isEditing
-                                            ? t('employees.leave_blank_to_keep')
-                                            : ''
-                                    }
-                                />
-                                {errors.password && (
-                                    <FieldDescription className="text-destructive">
-                                        {errors.password}
-                                    </FieldDescription>
-                                )}
-                            </FieldContent>
-                        </Field>
-                    </FieldGroup>
-
-                    {/* <FieldGroup>
-                        <Field>
-                            <div className="flex items-center justify-between">
-                                <FieldLabel>
-                                    {t('employees.is_active')}
-                                </FieldLabel>
-                                <Switch
-                                    checked={form.data.is_active}
-                                    onCheckedChange={(checked) =>
-                                        form.setData('is_active', checked)
-                                    }
-                                    disabled={processing}
-                                />
-                            </div>
-                            {errors.is_active && (
-                                <FieldDescription className="text-destructive">
-                                    {errors.is_active}
-                                </FieldDescription>
-                            )}
-                        </Field>
-                    </FieldGroup> */}
 
                     <Field orientation="horizontal">
                         <Switch
@@ -771,43 +571,30 @@ export default function EmployeeIndex({
                                 {t('ui.active')}
                             </FieldLabel>
                             <FieldDescription>
-                                {t('prefixes.available_hint')}
+                                {t('employees.active_hint')}
                             </FieldDescription>
                         </FieldContent>
                     </Field>
                 </form>
             </AppDialog>
 
-            <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
-                            <Trash2 />
-                        </AlertDialogMedia>
-                        <AlertDialogTitle>
-                            {t('employees.delete_title')}
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('employees.delete_confirmation', {
-                                name: selectedItem?.name ?? '',
-                            })}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={processing}>
-                            {t('ui.cancel')}
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                            variant="destructive"
-                            disabled={processing}
-                            onClick={confirmDelete}
-                        >
-                            <Trash2 />
-                            {t('ui.delete')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+
+            <AppConfirm
+                title={t('employees.delete_title')}
+                description={t('employees.delete_confirmation', {
+                    name: selectedItem?.name ?? '',
+                })}
+                openDialog={openDelete}
+                setOpenDialog={setOpenDelete}
+                disable={processing}
+                onClick={confirmDelete}
+                buttonLabel={
+                    <>
+                        <Trash2 className="size-4" />
+                        {t('ui.delete')}
+                    </>
+                }
+            />
         </>
     );
 }
