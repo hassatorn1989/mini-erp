@@ -26,12 +26,11 @@ class PrefixController extends Controller
             ->when($filters['search'] ?? null, function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
                     $query
-                        ->where('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+                        ->where('name', 'like', "%{$search}%");
                 });
             })
-            ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->where('is_active', true))
-            ->when(($filters['status'] ?? null) === 'inactive', fn ($query) => $query->where('is_active', false))
+            ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->active())
+            ->when(($filters['status'] ?? null) === 'inactive', fn ($query) => $query->inactive())
             ->latest()
             ->paginate($perPage)
             ->withQueryString();

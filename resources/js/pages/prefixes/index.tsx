@@ -1,5 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Filter, Plus, Search, Trash2, X } from 'lucide-react';
+import { Plus, Trash2} from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import {
@@ -14,21 +14,19 @@ import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
 import AppInput from '@/components/system/app-input';
 import { AppPagination } from '@/components/system/app-pagination';
-import AppSelect from '@/components/system/app-select';
 import AppSwitch from '@/components/system/app-switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FieldGroup } from '@/components/ui/field';
-import { defaultPerPage, perPages, statusActiveOptions } from '@/constants/app';
+import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
-import { defaultFilters } from '@/types/default';
 import type { Filters } from '@/types/default';
 import { getColumns } from './column';
+import FilterForm from './filter_form';
 import { emptyPrefixForm } from './type';
 import type { PrefixFormState, PrefixItem, PrefixPaginate } from './type';
-import FilterForm from './filter_form';
 
 export default function PrefixIndex({
     items,
@@ -86,10 +84,6 @@ export default function PrefixIndex({
         setOpenForm(true);
     };
 
-    // console.log(statusActiveOptions.map((status) => ({
-    // value: status,
-    // label: t(`ui.${status}_statuses`),
-    // })));
     const handleEdit = (item: PrefixItem) => {
         form.setData({
             id: item.id,
@@ -231,26 +225,10 @@ export default function PrefixIndex({
                 </div>
 
                 <FilterForm
-                    // filter={{
-                    //     value: filterValues,
-                    //     setValue: {
-                    //         search: (value: string) =>
-                    //             setFilterValues((current) => ({
-                    //                 ...current,
-                    //                 search: value,
-                    //             })),
-                    //         status: (value: string) =>
-                    //             setFilterValues((current) => ({
-                    //                 ...current,
-                    //                 status: value,
-                    //             })),
-                    //         per_page: (value: number) =>
-                    //             setFilterValues((current) => ({
-                    //                 ...current,
-                    //                 per_page: value,
-                    //             })),
-                    //     },
-                    // }}
+                    onChangeValues={{
+                        value: filterValues,
+                        setValue: setFilterValues,
+                    }}
                     submitFilters={(e) => {
                         e.preventDefault();
                         submitFilters();

@@ -10,12 +10,6 @@ export type Filters = {
     per_page: number;
 };
 
-export const defaultFilters: Filters = {
-    search: '',
-    status: '',
-    per_page: 10,
-};
-
 export type defaultOptions = {
     value: number | string;
     label: string;

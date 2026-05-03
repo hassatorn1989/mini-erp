@@ -1,10 +1,11 @@
+import { Filter, Search, X } from 'lucide-react';
+import React from 'react';
 import AppInput from '@/components/system/app-input';
 import AppSelect from '@/components/system/app-select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { defaultPerPage, perPages, statusActiveOptions } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
-import { Filter, Search, X } from 'lucide-react';
-import React from 'react';
 
 type FilterValues = {
     search: string;
@@ -13,9 +14,7 @@ type FilterValues = {
 };
 
 type SetFilterValues = {
-    search: (value: string) => void;
-    status: (value: string) => void;
-    per_page: (value: number) => void;
+    (value: FilterValues): void;
 };
 
 type FilterProps = {
@@ -46,19 +45,18 @@ function FilterForm({
                             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                             <AppInput
                                 type="text"
-                                label=""
-                                value={onChangeValues.value.search}
+                                value={filter.search}
                                 onChange={(value) =>
-                                    onChangeValues.setValue.search(value)
+                                    setFilter({ ...filter, search: value })
                                 }
                                 placeholder={t('prefixes.search_placeholder')}
                                 className="pl-9"
                             />
                         </div>
-                        {/* <AppSelect
-                            value={filterValues.status || 'all'}
+                        <AppSelect
+                            value={filter.status || 'all'}
                             onChange={(value) =>
-                                setFilterValues((current) => ({
+                                setFilter((current) => ({
                                     ...current,
                                     status: value === 'all' ? '' : value,
                                 }))
@@ -67,12 +65,12 @@ function FilterForm({
                                 value: status,
                                 label: t(`ui.${status}_statuses`),
                             }))}
-                        /> */}
+                        />
 
-                        {/* <AppSelect
-                            value={filterValues.per_page.toString()}
+                        <AppSelect
+                            value={filter.per_page.toString()}
                             onChange={(value) =>
-                                setFilterValues((current) => ({
+                                setFilter((current) => ({
                                     ...current,
                                     per_page: parseInt(value, defaultPerPage),
                                 }))
@@ -81,7 +79,7 @@ function FilterForm({
                                 value: perPage.toString(),
                                 label: `${perPage} ${t('ui.rows')}`,
                             }))}
-                        /> */}
+                        />
 
                         <Button type="submit" variant="secondary">
                             <Filter className="size-4" />
