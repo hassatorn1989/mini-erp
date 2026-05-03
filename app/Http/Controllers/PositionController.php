@@ -25,10 +25,7 @@ class PositionController extends Controller
         $positions = Position::query()
             ->when($filters['search'] ?? null, function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
-                    $query
-                        ->where('code', 'like', "%{$search}%")
-                        ->orWhere('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+                    $query->where('name', 'like', "%{$search}%");
                 });
             })
             ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->where('is_active', true))
@@ -82,7 +79,7 @@ class PositionController extends Controller
 
     public function destroy(Position $position): RedirectResponse
     {
-        $position->delete();
+        $position->delete(1);
 
         return redirect()
             ->route('positions.index')

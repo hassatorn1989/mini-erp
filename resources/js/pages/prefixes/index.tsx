@@ -1,18 +1,14 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { Plus, Trash2} from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import type { FormEvent } from 'react';
-import {
-    destroy,
-    index,
-    store,
-    update,
-} from '@/actions/App/Http/Controllers/PrefixController';
+import { index } from '@/actions/App/Http/Controllers/PrefixController';
 import Heading from '@/components/heading';
 import AppConfirm from '@/components/system/app-confirm';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
+import AppFilterForm from '@/components/system/app-filter-form';
 import AppInput from '@/components/system/app-input';
+import AppMainStat from '@/components/system/app-main-stat';
 import { AppPagination } from '@/components/system/app-pagination';
 import AppSwitch from '@/components/system/app-switch';
 import { Badge } from '@/components/ui/badge';
@@ -23,10 +19,12 @@ import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
-import { getColumns } from './column';
-import FilterForm from './filter_form';
-import { emptyPrefixForm } from './type';
-import type { PrefixFormState, PrefixItem, PrefixPaginate } from './type';
+import { emptyPrefixForm } from '../../types/app/prefix-type';
+import type {
+    PrefixFormState,
+    PrefixPaginate,
+} from '../../types/app/prefix-type';
+import { usePrefixActions } from './use-prefix-action';
 
 export default function PrefixIndex({
     items,
@@ -35,132 +33,52 @@ export default function PrefixIndex({
     items: PrefixPaginate;
     filters: Filters;
 }) {
-    const [openForm, setOpenForm] = useState(false);
-    const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<PrefixItem | null>(null);
+    const { t } = useTranslations();
+    const form = useForm<PrefixFormState>(emptyPrefixForm);
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
     });
-    const [processing, setProcessing] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const { t } = useTranslations();
-
-    const form = useForm<PrefixFormState>(emptyPrefixForm);
 
     const activeCount = items.data.filter((item) => item.is_active).length;
     const inactiveCount = items.data.length - activeCount;
+
     const hasFilters =
         !!filters.search || !!filters.status || filters.per_page !== 10;
+
     const isEditing = !!form.data.id;
 
-    const submitFilters = (nextFilters: Filters = filterValues) => {
-        router.get(
-            index.url({
-                query: {
-                    search: nextFilters.search || undefined,
-                    status: nextFilters.status || undefined,
-                    per_page: nextFilters.per_page,
-                },
-            }),
-            {},
-            {
-                preserveScroll: true,
-                preserveState: true,
-            },
-        );
-    };
+    const {
+        columns,
 
-    const resetFilters = () => {
-        setFilterValues(defaultFilters);
+        openForm,
+        setOpenForm,
 
-        router.get(index.url(), {}, { preserveScroll: true });
-    };
+        openDelete,
+        setOpenDelete,
 
-    const handleCreate = () => {
-        form.reset();
-        form.setData(emptyPrefixForm);
-        setErrors({});
-        setOpenForm(true);
-    };
+        selectedItem,
 
-    const handleEdit = (item: PrefixItem) => {
-        form.setData({
-            id: item.id,
-            name: item.name,
-            is_active: item.is_active,
-        });
-        setErrors({});
-        setOpenForm(true);
-    };
+        processing,
+        errors,
 
-    const handleDelete = (item: PrefixItem) => {
-        setSelectedItem(item);
-        setOpenDelete(true);
-    };
-
-    const columns = getColumns({
-        onEdit: handleEdit,
-        onDelete: handleDelete,
+        submitFilters,
+        resetFilters,
+        handleCreate,
+        handleSubmit,
+        confirmDelete,
+    } = usePrefixActions({
         t,
+        form,
+        filterValues,
+        setFilterValues,
+        defaultFilters,
+        emptyPrefixForm,
     });
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const payload = {
-            name: form.data.name,
-            is_active: form.data.is_active,
-        };
-
-        setProcessing(true);
-
-        const options = {
-            preserveScroll: true,
-            onError: (errors: Record<string, string>) => {
-                setErrors(errors);
-            },
-            onSuccess: () => {
-                setOpenForm(false);
-                form.reset();
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        };
-
-        if (form.data.id) {
-            router.put(update(form.data.id), payload, options);
-
-            return;
-        }
-
-        router.post(store(), payload, options);
-    };
-
-    const confirmDelete = () => {
-        if (!selectedItem) {
-            return;
-        }
-
-        setProcessing(true);
-
-        router.delete(destroy(selectedItem.id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setOpenDelete(false);
-                setSelectedItem(null);
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        });
-    };
 
     return (
         <>
             <Head title={t('prefixes.title')} />
-
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto p-4 md:p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                     <Heading
@@ -174,57 +92,14 @@ export default function PrefixIndex({
                     </Button>
                 </div>
 
-                <div className="grid gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs md:grid-cols-3 lg:px-0 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
-                    <Card size="sm">
-                        <CardHeader>
-                            <CardTitle>{t('prefixes.total')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-semibold">
-                                {items.total}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                {hasFilters
-                                    ? t('prefixes.matching_filters')
-                                    : t('prefixes.module_total')}
-                            </p>
-                        </CardContent>
-                    </Card>
+                <AppMainStat
+                    total={items.total}
+                    activeCount={activeCount}
+                    inactiveCount={inactiveCount}
+                    hasFilters={hasFilters}
+                />
 
-                    <Card size="sm">
-                        <CardHeader>
-                            <CardTitle>
-                                {t('prefixes.active_on_page')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-semibold">
-                                {activeCount}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                {t('prefixes.active_card_description')}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card size="sm">
-                        <CardHeader>
-                            <CardTitle>
-                                {t('prefixes.inactive_on_page')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-semibold">
-                                {inactiveCount}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                {t('prefixes.inactive_card_description')}
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <FilterForm
+                <AppFilterForm
                     onChangeValues={{
                         value: filterValues,
                         setValue: setFilterValues,

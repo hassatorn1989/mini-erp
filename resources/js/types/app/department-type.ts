@@ -22,7 +22,6 @@ export const emptyDepartmentForm: DepartmentFormState = {
     is_active: true,
 };
 
-
 export type DepartmentPaginate = {
     data: DepartmentItem[];
     links: PaginationLink[];

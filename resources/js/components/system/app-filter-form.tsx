@@ -26,7 +26,7 @@ type FilterProps = {
     resetFilters: () => void;
 };
 
-function FilterForm({
+function AppFilterForm({
     onChangeValues: { value: filter, setValue: setFilter },
     submitFilters,
     resetFilters,
@@ -101,4 +101,4 @@ function FilterForm({
     );
 }
 
-export default FilterForm;
+export default AppFilterForm;

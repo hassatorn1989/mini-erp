@@ -1,55 +1,30 @@
-import { Head, router, useForm } from '@inertiajs/react';
-import { Filter, Plus, Search, Trash2, X } from 'lucide-react';
+import { Head, useForm } from '@inertiajs/react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import type { FormEvent } from 'react';
-import {
-    destroy,
-    index,
-    store,
-    update,
-} from '@/actions/App/Http/Controllers/DepartmentController';
+import { index } from '@/actions/App/Http/Controllers/DepartmentController';
 import Heading from '@/components/heading';
+import AppConfirm from '@/components/system/app-confirm';
 import { AppDataTable } from '@/components/system/app-datatable';
 import { AppDialog } from '@/components/system/app-dialog';
+import AppFilterForm from '@/components/system/app-filter-form';
+import AppInput from '@/components/system/app-input';
+import AppMainStat from '@/components/system/app-main-stat';
 import { AppPagination } from '@/components/system/app-pagination';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogMedia,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import AppSwitch from '@/components/system/app-switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-    Field,
-    FieldContent,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { FieldGroup } from '@/components/ui/field';
+import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
-import { getColumns } from './column';
-import { type DepartmentItem, type DepartmentFormState, type DepartmentPaginate, emptyDepartmentForm } from './type';
-import { defaultFilters, Filters } from '@/types/default';
-import AppInput from '@/components/system/app-input';
-import AppSwitch from '@/components/system/app-switch';
-import AppConfirm from '@/components/system/app-confirm';
+import type { Filters } from '@/types/default';
+import { emptyDepartmentForm } from '../../types/app/department-type';
+import type {
+    DepartmentFormState,
+    DepartmentPaginate,
+} from '../../types/app/department-type';
+import { useDepartmentActions } from './use-department-action';
 
 export default function DepartmentIndex({
     items,
@@ -58,129 +33,48 @@ export default function DepartmentIndex({
     items: DepartmentPaginate;
     filters: Filters;
 }) {
-    const [openForm, setOpenForm] = useState(false);
-    const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<DepartmentItem | null>(null);
+    const { t } = useTranslations();
+    const form = useForm<DepartmentFormState>(emptyDepartmentForm);
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
     });
-    const [processing, setProcessing] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const { t } = useTranslations();
-
-    const form = useForm<DepartmentFormState>(emptyDepartmentForm);
 
     const activeCount = items.data.filter((item) => item.is_active).length;
     const inactiveCount = items.data.length - activeCount;
+
     const hasFilters =
         !!filters.search || !!filters.status || filters.per_page !== 10;
+
     const isEditing = !!form.data.id;
 
-    const submitFilters = (nextFilters: Filters = filterValues) => {
-        router.get(
-            index.url({
-                query: {
-                    search: nextFilters.search || undefined,
-                    status: nextFilters.status || undefined,
-                    per_page: nextFilters.per_page,
-                },
-            }),
-            {},
-            {
-                preserveScroll: true,
-                preserveState: true,
-            },
-        );
-    };
+    const {
+        columns,
 
-    const resetFilters = () => {
-        setFilterValues(defaultFilters);
+        openForm,
+        setOpenForm,
 
-        router.get(index.url(), {}, { preserveScroll: true });
-    };
+        openDelete,
+        setOpenDelete,
 
-    const handleCreate = () => {
-        form.reset();
-        form.setData(emptyDepartmentForm);
-        setErrors({});
-        setOpenForm(true);
-    };
+        selectedItem,
 
-    const handleEdit = (item: DepartmentItem) => {
-        form.setData({
-            id: item.id,
-            code: item.code,
-            name: item.name,
-            is_active: item.is_active,
-        });
-        setErrors({});
-        setOpenForm(true);
-    };
+        processing,
+        errors,
 
-    const handleDelete = (item: DepartmentItem) => {
-        setSelectedItem(item);
-        setOpenDelete(true);
-    };
-
-    const columns = getColumns({
-        onEdit: handleEdit,
-        onDelete: handleDelete,
+        submitFilters,
+        resetFilters,
+        handleCreate,
+        handleSubmit,
+        confirmDelete,
+    } = useDepartmentActions({
         t,
+        form,
+        filterValues,
+        setFilterValues,
+        defaultFilters,
+        emptyDepartmentForm,
     });
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const payload = {
-            code: form.data.code,
-            name: form.data.name,
-            is_active: form.data.is_active,
-        };
-
-        setProcessing(true);
-
-        const options = {
-            preserveScroll: true,
-            onError: (errors: Record<string, string>) => {
-                setErrors(errors);
-            },
-            onSuccess: () => {
-                setOpenForm(false);
-                form.reset();
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        };
-
-        if (form.data.id) {
-            router.put(update(form.data.id), payload, options);
-
-            return;
-        }
-
-        router.post(store(), payload, options);
-    };
-
-    const confirmDelete = () => {
-        if (!selectedItem) {
-            return;
-        }
-
-        setProcessing(true);
-
-        router.delete(destroy(selectedItem.id), {
-            preserveScroll: true,
-            onSuccess: () => {
-                setOpenDelete(false);
-                setSelectedItem(null);
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        });
-    };
 
     return (
         <>
@@ -199,147 +93,24 @@ export default function DepartmentIndex({
                     </Button>
                 </div>
 
-                <div className="grid gap-3 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs md:grid-cols-3 lg:px-0 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
-                    <Card size="sm">
-                        <CardHeader>
-                            <CardTitle>{t('departments.total')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-semibold">
-                                {items.total}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                {hasFilters
-                                    ? t('departments.matching_filters')
-                                    : t('departments.module_total')}
-                            </p>
-                        </CardContent>
-                    </Card>
+                <AppMainStat
+                    total={items.total}
+                    activeCount={activeCount}
+                    inactiveCount={inactiveCount}
+                    hasFilters={hasFilters}
+                />
 
-                    <Card size="sm">
-                        <CardHeader>
-                            <CardTitle>
-                                {t('departments.active_on_page')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-semibold">
-                                {activeCount}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                {t('departments.active_card_description')}
-                            </p>
-                        </CardContent>
-                    </Card>
-
-                    <Card size="sm">
-                        <CardHeader>
-                            <CardTitle>
-                                {t('departments.inactive_on_page')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-semibold">
-                                {inactiveCount}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                                {t('departments.inactive_card_description')}
-                            </p>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <Card className="gap-3 py-3">
-                    <CardContent>
-                        <form
-                            className="grid gap-3 lg:grid-cols-[minmax(16rem,1fr)_12rem_11rem_auto_auto]"
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                submitFilters();
-                            }}
-                        >
-                            <div className="relative">
-                                <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-                                <Input
-                                    value={filterValues.search}
-                                    onChange={(e) =>
-                                        setFilterValues((current) => ({
-                                            ...current,
-                                            search: e.target.value,
-                                        }))
-                                    }
-                                    className="pl-9"
-                                    placeholder={t(
-                                        'departments.search_placeholder',
-                                    )}
-                                />
-                            </div>
-
-                            <Select
-                                value={filterValues.status || 'all'}
-                                onValueChange={(value) =>
-                                    setFilterValues((prev) => ({
-                                        ...prev,
-                                        status: value === 'all' ? '' : value,
-                                    }))
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder={t('ui.status')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">
-                                        {t('ui.all_statuses')}
-                                    </SelectItem>
-                                    <SelectItem value="active">
-                                        {t('ui.active')}
-                                    </SelectItem>
-                                    <SelectItem value="inactive">
-                                        {t('ui.inactive')}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-
-                            <Select
-                                value={filterValues.per_page.toString()}
-                                onValueChange={(value) =>
-                                    setFilterValues((prev) => ({
-                                        ...prev,
-                                        per_page: Number(value),
-                                    }))
-                                }
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder={t('ui.rows')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {[10, 15, 25, 50].map((size) => (
-                                        <SelectItem
-                                            key={size}
-                                            value={size.toString()}
-                                        >
-                                            {size} {t('ui.rows')}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
-                            <Button type="submit" variant="secondary">
-                                <Filter className="size-4" />
-                                {t('ui.apply')}
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={resetFilters}
-                            >
-                                <X className="size-4" />
-                                {t('ui.reset')}
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+                <AppFilterForm
+                    onChangeValues={{
+                        value: filterValues,
+                        setValue: setFilterValues,
+                    }}
+                    submitFilters={(e) => {
+                        e.preventDefault();
+                        submitFilters();
+                    }}
+                    resetFilters={resetFilters}
+                />
 
                 <Card className="gap-0 py-0">
                     <CardHeader className="border-b py-4">

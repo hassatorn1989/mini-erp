@@ -10,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { PrefixItem } from './type';
+import type { PrefixItem } from '../../types/app/prefix-type';
 
 type ColumnsProps = {
     onEdit: (item: PrefixItem) => void;
