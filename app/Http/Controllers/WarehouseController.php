@@ -81,7 +81,7 @@ class WarehouseController extends Controller
 
     public function destroy(Warehouse $warehouse): RedirectResponse
     {
-        $warehouse->delete();
+        $warehouse->delete(1);
 
         return redirect()
             ->route('warehouses.index')
