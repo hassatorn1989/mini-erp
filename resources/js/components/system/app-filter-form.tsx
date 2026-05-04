@@ -42,15 +42,19 @@ function AppFilterForm({
                         onSubmit={submitFilters}
                     >
                         <div className="relative">
-                            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                            {/* <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" /> */}
+
                             <AppInput
                                 type="text"
                                 value={filter.search}
-                                onChange={(value) =>
-                                    setFilter({ ...filter, search: value })
+                                onChange={(e) =>
+                                    setFilter({
+                                        ...filter,
+                                        search: e.target.value,
+                                    })
                                 }
                                 placeholder={t('prefixes.search_placeholder')}
-                                className="pl-9"
+                                className="pl-10"
                             />
                         </div>
                         <AppSelect

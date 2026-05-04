@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
-import type { FormEvent } from 'react';
 import { useMemo, useState } from 'react';
 
+import { useForm, Controller } from 'react-hook-form';
 import {
     destroy,
     index,
@@ -13,14 +13,8 @@ import type { PrefixFormState, PrefixItem } from '@/types/app/prefix-type';
 import type { Filters } from '@/types/default';
 import { getColumns } from './column';
 
-
 type UsePrefixActionsProps = {
     t: (key: string) => string;
-    form: {
-        data: PrefixFormState;
-        setData: (data: PrefixFormState) => void;
-        reset: () => void;
-    };
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
@@ -29,7 +23,6 @@ type UsePrefixActionsProps = {
 
 export function usePrefixActions({
     t,
-    form,
     filterValues,
     setFilterValues,
     defaultFilters,
@@ -39,7 +32,19 @@ export function usePrefixActions({
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedItem, setSelectedItem] = useState<PrefixItem | null>(null);
     const [processing, setProcessing] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const {
+        register,
+        handleSubmit,
+        setError,
+        setValue,
+        watch,
+        reset,
+        control,
+        formState: { errors },
+    } = useForm<PrefixFormState>({
+        defaultValues: emptyPrefixForm,
+    });
 
     const submitFilters = (nextFilters: Filters = filterValues) => {
         router.get(
@@ -65,59 +70,22 @@ export function usePrefixActions({
     };
 
     const handleCreate = () => {
-        form.reset();
-        form.setData(emptyPrefixForm);
-        setErrors({});
+        reset({ ...emptyPrefixForm });
         setOpenForm(true);
     };
 
     const handleEdit = (item: PrefixItem) => {
-        form.setData({
+        reset({
             id: item.id,
             name: item.name,
             is_active: item.is_active,
         });
-
-        setErrors({});
         setOpenForm(true);
     };
 
     const handleDelete = (item: PrefixItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
-    };
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const payload = {
-            name: form.data.name,
-            is_active: form.data.is_active,
-        };
-
-        setProcessing(true);
-
-        const options = {
-            preserveScroll: true,
-            onError: (errors: Record<string, string>) => {
-                setErrors(errors);
-            },
-            onSuccess: () => {
-                setOpenForm(false);
-                form.reset();
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        };
-
-        if (form.data.id) {
-            router.put(update(form.data.id), payload, options);
-
-            return;
-        }
-
-        router.post(store(), payload, options);
     };
 
     const confirmDelete = () => {
@@ -129,6 +97,9 @@ export function usePrefixActions({
 
         router.delete(destroy(selectedItem.id), {
             preserveScroll: true,
+            onError: () => {
+                setProcessing(false);
+            },
             onSuccess: () => {
                 setOpenDelete(false);
                 setSelectedItem(null);
@@ -136,6 +107,50 @@ export function usePrefixActions({
             onFinish: () => {
                 setProcessing(false);
             },
+        });
+    };
+
+    const onSubmit = (data: PrefixFormState) => {
+        setProcessing(true);
+        const payload = {
+            name: data.name,
+            is_active: data.is_active,
+        };
+
+        if (data.id) {
+            router.put(update(data.id), payload, {
+                preserveScroll: true,
+                onError: (errors) => {
+                    Object.entries(errors).forEach(([field, message]) => {
+                        setError(field as keyof PrefixFormState, { message });
+                    });
+                    setProcessing(false);
+                },
+                onSuccess: () => {
+                    setOpenForm(false);
+                    reset({ ...emptyPrefixForm });
+                    setProcessing(false);
+                },
+                onFinish: () => setProcessing(false),
+            });
+
+            return;
+        }
+
+        router.post(store(), payload, {
+            preserveScroll: true,
+            onError: (errors) => {
+                Object.entries(errors).forEach(([field, message]) => {
+                    setError(field as keyof PrefixFormState, { message });
+                });
+                setProcessing(false);
+            },
+            onSuccess: () => {
+                setOpenForm(false);
+                reset({ ...emptyPrefixForm });
+                setProcessing(false);
+            },
+            onFinish: () => setProcessing(false),
         });
     };
 
@@ -149,6 +164,8 @@ export function usePrefixActions({
         [t],
     );
 
+    const isEditMode = !!watch('id');
+
     return {
         columns,
 
@@ -157,19 +174,29 @@ export function usePrefixActions({
 
         openDelete,
         setOpenDelete,
+        confirmDelete,
 
         selectedItem,
         setSelectedItem,
 
-        processing,
-        errors,
+        isProcessing: processing,
 
         submitFilters,
         resetFilters,
         handleCreate,
         handleEdit,
         handleDelete,
-        handleSubmit,
-        confirmDelete,
+
+        // reach-hook-form
+        handleSubmit: handleSubmit(onSubmit),
+        register,
+        setValue,
+        reset,
+        control,
+        watch,
+        errors,
+        Controller,
+
+        isEditMode,
     };
 }

@@ -27,8 +27,7 @@ class WarehouseController extends Controller
                 $query->where(function ($query) use ($search): void {
                     $query
                         ->where('code', 'like', "%{$search}%")
-                        ->orWhere('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+                        ->orWhere('name', 'like', "%{$search}%");
                 });
             })
             ->when(($filters['status'] ?? null) === 'active', fn ($query) => $query->where('is_active', true))

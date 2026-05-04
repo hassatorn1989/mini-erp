@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { index } from '@/actions/App/Http/Controllers/WarehouseController';
@@ -18,10 +18,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
 import { emptyWarehouseForm } from '../../types/app/warehouse-type';
-import type {
-    WarehousePaginate,
-    WarehouseFormState,
-} from '../../types/app/warehouse-type';
+import type { WarehousePaginate } from '../../types/app/warehouse-type';
 import { useWarehouseActions } from './use-warehouse-action';
 
 const optionTypes = [
@@ -43,7 +40,7 @@ export default function WarehouseIndex({
     filters: Filters;
 }) {
     const { t } = useTranslations();
-    const form = useForm<WarehouseFormState>(emptyWarehouseForm);
+
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
@@ -55,30 +52,28 @@ export default function WarehouseIndex({
     const hasFilters =
         !!filters.search || !!filters.status || filters.per_page !== 10;
 
-    const isEditing = !!form.data.id;
-
     const {
         columns,
-
         openForm,
         setOpenForm,
-
+        isProcessing,
         openDelete,
         setOpenDelete,
-
+        confirmDelete,
         selectedItem,
 
-        processing,
         errors,
+        register,
+        handleSubmit,
+        control,
 
         submitFilters,
         resetFilters,
         handleCreate,
-        handleSubmit,
-        confirmDelete,
+
+        isEditMode,
     } = useWarehouseActions({
         t,
-        form,
         filterValues,
         setFilterValues,
         defaultFilters,
@@ -135,57 +130,55 @@ export default function WarehouseIndex({
             </div>
 
             <AppDialog
-                open={openForm}
-                onOpenChange={setOpenForm}
+                openDialogState={{
+                    open: openForm,
+                    onOpenChange: setOpenForm,
+                }}
                 title={
-                    isEditing ? t('warehouses.edit') : t('warehouses.create')
+                    isEditMode ? t('warehouses.edit') : t('warehouses.create')
                 }
                 description={t('warehouses.dialog_description')}
                 submitLabel={
-                    isEditing ? t('ui.save_changes') : t('warehouses.create')
+                    isEditMode ? t('ui.save_changes') : t('warehouses.create')
                 }
-                processing={processing}
+                disable={isProcessing}
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
                     <AppInput
-                        type="text"
-                        label={t('warehouses.code')}
-                        value={form.data.code}
-                        onChange={(value) => form.setData('code', value)}
+                        label={t('warehouses.fields.code')}
+                        registration={register('code', {
+                            required: t('warehouses.validation.code_required'),
+                        })}
                         error={errors.code}
-                        placeholder={t('warehouses.placeholder_code')}
-                        isRequired
+                        required
+                        disabled={isProcessing}
                     />
+
                     <AppInput
-                        type="text"
-                        label={t('warehouses.name')}
-                        value={form.data.name}
-                        onChange={(value) => form.setData('name', value)}
+                        label={t('warehouses.fields.name')}
+                        registration={register('name', {
+                            required: t('warehouses.validation.name_required'),
+                        })}
                         error={errors.name}
-                        placeholder={t('warehouses.placeholder_name')}
-                        isRequired
+                        required
+                        disabled={isProcessing}
                     />
 
                     <AppSelect
-                        label={t('warehouses.type')}
-                        value={form.data.type}
-                        onChange={(value) =>
-                            form.setData(
-                                'type',
-                                value as WarehouseFormState['type'],
-                            )
-                        }
+                        label={t('warehouses.fields.type')}
                         options={optionTypes}
-                        placeholder={t('warehouses.placeholder_type')}
+                        control={control}
+                        controlName="type"
+                        disabled={isProcessing}
+                        placeholder={t('warehouses.fields.type_placeholder')}
                     />
 
                     <AppSwitch
                         label={t('ui.active')}
-                        checked={form.data.is_active}
-                        onCheckedChange={(checked) =>
-                            form.setData('is_active', checked)
-                        }
+                        disabled={isProcessing}
+                        control={control}
+                        controlName="is_active"
                     />
                 </FieldGroup>
             </AppDialog>
@@ -197,7 +190,7 @@ export default function WarehouseIndex({
                     name: selectedItem?.name ?? '',
                 })}
                 openDialog={{ open: openDelete, setOpen: setOpenDelete }}
-                disable={processing}
+                disable={isProcessing}
                 onClick={confirmDelete}
                 buttonLabel={
                     <>

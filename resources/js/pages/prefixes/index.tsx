@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { index } from '@/actions/App/Http/Controllers/PrefixController';
@@ -17,10 +17,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
 import { emptyPrefixForm } from '../../types/app/prefix-type';
-import type {
-    PrefixFormState,
-    PrefixPaginate,
-} from '../../types/app/prefix-type';
+import type { PrefixPaginate } from '../../types/app/prefix-type';
 import { usePrefixActions } from './use-prefix-action';
 
 export default function PrefixIndex({
@@ -31,7 +28,7 @@ export default function PrefixIndex({
     filters: Filters;
 }) {
     const { t } = useTranslations();
-    const form = useForm<PrefixFormState>(emptyPrefixForm);
+
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
@@ -43,30 +40,28 @@ export default function PrefixIndex({
     const hasFilters =
         !!filters.search || !!filters.status || filters.per_page !== 10;
 
-    const isEditing = !!form.data.id;
-
     const {
         columns,
-
         openForm,
         setOpenForm,
-
+        isProcessing,
         openDelete,
         setOpenDelete,
-
+        confirmDelete,
         selectedItem,
 
-        processing,
         errors,
+        register,
+        handleSubmit,
+        control,
 
         submitFilters,
         resetFilters,
         handleCreate,
-        handleSubmit,
-        confirmDelete,
+
+        isEditMode,
     } = usePrefixActions({
         t,
-        form,
         filterValues,
         setFilterValues,
         defaultFilters,
@@ -122,45 +117,46 @@ export default function PrefixIndex({
             </div>
 
             <AppDialog
-                open={openForm}
-                onOpenChange={setOpenForm}
-                title={isEditing ? t('prefixes.edit') : t('prefixes.create')}
+                openDialogState={{
+                    open: openForm,
+                    onOpenChange: setOpenForm,
+                }}
+                title={isEditMode ? t('prefixes.edit') : t('prefixes.create')}
                 description={t('prefixes.dialog_description')}
                 submitLabel={
-                    isEditing ? t('ui.save_changes') : t('prefixes.create')
+                    isEditMode ? t('ui.save_changes') : t('prefixes.create')
                 }
-                processing={processing}
+                disable={isProcessing}
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
                     <AppInput
-                        type="text"
-                        label={t('prefixes.name')}
-                        value={form.data.name}
-                        onChange={(value) => form.setData('name', value)}
+                        label="ชื่อคำนำหน้า"
+                        registration={register('name', {
+                            required: 'กรุณากรอกชื่อคำนำหน้า',
+                        })}
                         error={errors.name}
-                        placeholder={t('prefixes.placeholder_name')}
-                        isRequired={true}
+                        required
+                        disabled={isProcessing}
                     />
 
                     <AppSwitch
                         label={t('ui.active')}
-                        checked={form.data.is_active}
-                        onCheckedChange={(checked) =>
-                            form.setData('is_active', checked)
-                        }
+                        disabled={isProcessing}
+                        control={control}
+                        controlName="is_active"
                     />
                 </FieldGroup>
             </AppDialog>
 
             <AppConfirm
                 icon={<Trash2 />}
-                title={t('prefixes.delete_title')}
-                description={t('prefixes.delete_confirmation', {
+                title={t('warehouses.delete_title')}
+                description={t('warehouses.delete_confirmation', {
                     name: selectedItem?.name ?? '',
                 })}
                 openDialog={{ open: openDelete, setOpen: setOpenDelete }}
-                disable={processing}
+                disable={isProcessing}
                 onClick={confirmDelete}
                 buttonLabel={
                     <>

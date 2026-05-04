@@ -1,4 +1,5 @@
 import React from 'react';
+import { Controller } from 'react-hook-form';
 import {
     Field,
     FieldContent,
@@ -20,25 +21,81 @@ type Options = {
 
 type AppSelectProps = {
     label?: string;
-    error?: boolean | string;
+    error?: boolean;
     placeholder?: string;
-    value: string;
+    value?: string;
+    onChange?: (value: string) => void;
     options: Options[];
-    onChange: (value: string) => void;
     disabled?: boolean;
     isRequired?: boolean;
+    control?: any;
+    controlName?: string;
 };
 function AppSelect({
     label,
     error,
     placeholder,
     value,
-    options,
     onChange,
+    options,
     disabled,
     isRequired = false,
+    control,
+    controlName,
 }: AppSelectProps) {
-    return (
+    return control && controlName ? (
+        <>
+            <Controller
+                name={controlName}
+                control={control}
+                render={({ field }) => (
+                    <Field data-invalid={!!error}>
+                        {label && (
+                            <FieldLabel>
+                                {label}
+                                {isRequired && (
+                                    <span className="text-destructive">*</span>
+                                )}
+                            </FieldLabel>
+                        )}
+                        <FieldContent>
+                            <Select
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                disabled={disabled}
+                            >
+                                <SelectTrigger
+                                    className="w-full"
+                                    aria-invalid={!!error}
+                                >
+                                    <SelectValue
+                                        placeholder={
+                                            '-- ' + placeholder + ' --'
+                                        }
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {options.map((option) => (
+                                        <SelectItem
+                                            key={option.value}
+                                            value={option.value.toString()}
+                                        >
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {error && (
+                                <FieldDescription className="text-destructive">
+                                    {error}
+                                </FieldDescription>
+                            )}
+                        </FieldContent>
+                    </Field>
+                )}
+            />
+        </>
+    ) : (
         <>
             <Field data-invalid={!!error}>
                 {label && (

@@ -1,25 +1,23 @@
 import { router } from '@inertiajs/react';
-import type { FormEvent } from 'react';
 import { useMemo, useState } from 'react';
 
+import { useForm, Controller } from 'react-hook-form';
 import {
     destroy,
     index,
     store,
     update,
 } from '@/actions/App/Http/Controllers/WarehouseController';
-import type { WarehouseFormState, WarehouseItem } from '@/types/app/warehouse-type';
+
+import type {
+    WarehouseFormState,
+    WarehouseItem,
+} from '@/types/app/warehouse-type';
 import type { Filters } from '@/types/default';
 import { getColumns } from './column';
 
-
 type UseWarehouseActionsProps = {
     t: (key: string) => string;
-    form: {
-        data: WarehouseFormState;
-        setData: (data: WarehouseFormState) => void;
-        reset: () => void;
-    };
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
@@ -28,7 +26,6 @@ type UseWarehouseActionsProps = {
 
 export function useWarehouseActions({
     t,
-    form,
     filterValues,
     setFilterValues,
     defaultFilters,
@@ -36,9 +33,24 @@ export function useWarehouseActions({
 }: UseWarehouseActionsProps) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<WarehouseItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<WarehouseItem | null>(
+        null,
+    );
     const [processing, setProcessing] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const {
+        register,
+        handleSubmit,
+        setError,
+        setValue,
+        watch,
+        reset,
+        control,
+        formState: { errors },
+    } = useForm<WarehouseFormState>({
+        defaultValues: emptyWarehouseForm,
+    });
+
 
     const submitFilters = (nextFilters: Filters = filterValues) => {
         router.get(
@@ -64,14 +76,12 @@ export function useWarehouseActions({
     };
 
     const handleCreate = () => {
-        form.reset();
-        form.setData(emptyWarehouseForm);
-        setErrors({});
+        reset({ ...emptyWarehouseForm });
         setOpenForm(true);
     };
 
     const handleEdit = (item: WarehouseItem) => {
-        form.setData({
+        reset({
             id: item.id,
             code: item.code,
             name: item.name,
@@ -79,48 +89,12 @@ export function useWarehouseActions({
             is_active: item.is_active,
         });
 
-        setErrors({});
         setOpenForm(true);
     };
 
     const handleDelete = (item: WarehouseItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
-    };
-
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const payload = {
-            code: form.data.code,
-            name: form.data.name,
-            type: form.data.type,
-            is_active: form.data.is_active,
-        };
-
-        setProcessing(true);
-
-        const options = {
-            preserveScroll: true,
-            onError: (errors: Record<string, string>) => {
-                setErrors(errors);
-            },
-            onSuccess: () => {
-                setOpenForm(false);
-                form.reset();
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        };
-
-        if (form.data.id) {
-            router.put(update(form.data.id), payload, options);
-
-            return;
-        }
-
-        router.post(store(), payload, options);
     };
 
     const confirmDelete = () => {
@@ -132,6 +106,9 @@ export function useWarehouseActions({
 
         router.delete(destroy(selectedItem.id), {
             preserveScroll: true,
+            onError: () => {
+                setProcessing(false);
+            },
             onSuccess: () => {
                 setOpenDelete(false);
                 setSelectedItem(null);
@@ -139,6 +116,54 @@ export function useWarehouseActions({
             onFinish: () => {
                 setProcessing(false);
             },
+        });
+    };
+
+    const onSubmit = (data: WarehouseFormState) => {
+        setProcessing(true);
+        const payload = {
+            name: data.name,
+            code: data.code,
+            type: data.type,
+            is_active: data.is_active,
+        };
+
+        if (data.id) {
+            router.put(update(data.id), payload, {
+                preserveScroll: true,
+                onError: (errors) => {
+                    Object.entries(errors).forEach(([field, message]) => {
+                        setError(field as keyof WarehouseFormState, {
+                            message,
+                        });
+                    });
+                    setProcessing(false);
+                },
+                onSuccess: () => {
+                    setOpenForm(false);
+                    reset();
+                    setProcessing(false);
+                },
+                onFinish: () => setProcessing(false),
+            });
+
+            return;
+        }
+
+        router.post(store(), payload, {
+            preserveScroll: true,
+            onError: (errors) => {
+                Object.entries(errors).forEach(([field, message]) => {
+                    setError(field as keyof WarehouseFormState, { message });
+                });
+                setProcessing(false);
+            },
+            onSuccess: () => {
+                setOpenForm(false);
+                reset();
+                setProcessing(false);
+            },
+            onFinish: () => setProcessing(false),
         });
     };
 
@@ -152,6 +177,8 @@ export function useWarehouseActions({
         [t],
     );
 
+    const isEditMode = !!watch('id');
+
     return {
         columns,
 
@@ -160,19 +187,29 @@ export function useWarehouseActions({
 
         openDelete,
         setOpenDelete,
+        confirmDelete,
 
         selectedItem,
         setSelectedItem,
 
-        processing,
-        errors,
+        isProcessing: processing,
 
         submitFilters,
         resetFilters,
         handleCreate,
         handleEdit,
         handleDelete,
-        handleSubmit,
-        confirmDelete,
+
+        // reach-hook-form
+        handleSubmit: handleSubmit(onSubmit),
+        register,
+        setValue,
+        reset,
+        control,
+        watch,
+        errors,
+        Controller,
+
+        isEditMode,
     };
 }

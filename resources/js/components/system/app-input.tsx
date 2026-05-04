@@ -1,4 +1,8 @@
-import React from 'react'
+import React from 'react';
+import type {
+    FieldError,
+    UseFormRegister,
+} from 'react-hook-form';
 import {
     Field,
     FieldContent,
@@ -8,56 +12,53 @@ import {
 import { Input } from '@/components/ui/input';
 
 type AppInputProps = {
-    type: string;
-    label?: string;
-    error?: boolean | string;
-    placeholder?: string;
-    value: string;
-    onChange: (value: string) => void;
+    label: string;
+    registration?: ReturnType<UseFormRegister<any>>;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    error?: FieldError;
+    required?: boolean;
     disabled?: boolean;
-    isRequired?: boolean;
-    className?: string;
+    placeholder?: string;
+    type?: React.HTMLInputTypeAttribute;
 };
-
 function AppInput({
-    type = 'text',
     label,
-    error,
-    placeholder = '',
-    value,
+    registration,
     onChange,
+    error,
+    required = false,
     disabled = false,
-    isRequired = false,
-    className = '',
+    placeholder = '',
+    type = 'text',
 }: AppInputProps) {
+
     return (
-        <>
-            <Field data-invalid={!!error}>
-                {label && (
-                    <FieldLabel>
-                        {label}
-                        {isRequired && <span className="text-destructive">*</span>}
-                    </FieldLabel>
+        <Field data-invalid={!!error}>
+            {label && (
+                <FieldLabel>
+                    {label}
+                    {required && <span className="text-destructive">*</span>}
+                </FieldLabel>
+            )}
+
+            <FieldContent>
+                <Input
+                    type={type}
+                    placeholder={placeholder}
+                    disabled={disabled}
+                    aria-invalid={!!error}
+                    {...registration}
+                    onChange={onChange}
+                />
+
+                {error && (
+                    <FieldDescription className="text-destructive">
+                        {error.message}
+                    </FieldDescription>
                 )}
-                <FieldContent>
-                    <Input
-                        type={type}
-                        value={value}
-                        placeholder={placeholder}
-                        onChange={(e) => onChange(e.target.value)}
-                        disabled={disabled}
-                        className={className}
-                        aria-invalid={!!error}
-                    />
-                    {error && (
-                        <FieldDescription className="text-destructive">
-                            {error}
-                        </FieldDescription>
-                    )}
-                </FieldContent>
-            </Field>
-        </>
+            </FieldContent>
+        </Field>
     );
 }
 
-export default AppInput
+export default AppInput;

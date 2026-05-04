@@ -1,7 +1,7 @@
 import { router } from '@inertiajs/react';
-import type { FormEvent } from 'react';
 import { useMemo, useState } from 'react';
 
+import { useForm, Controller } from 'react-hook-form';
 import {
     destroy,
     index,
@@ -13,14 +13,8 @@ import type { DepartmentFormState, DepartmentItem } from '@/types/app/department
 import type { Filters } from '@/types/default';
 import { getColumns } from './column';
 
-
 type UseDepartmentActionsProps = {
     t: (key: string) => string;
-    form: {
-        data: DepartmentFormState;
-        setData: (data: DepartmentFormState) => void;
-        reset: () => void;
-    };
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
@@ -29,7 +23,6 @@ type UseDepartmentActionsProps = {
 
 export function useDepartmentActions({
     t,
-    form,
     filterValues,
     setFilterValues,
     defaultFilters,
@@ -39,7 +32,19 @@ export function useDepartmentActions({
     const [openDelete, setOpenDelete] = useState(false);
     const [selectedItem, setSelectedItem] = useState<DepartmentItem | null>(null);
     const [processing, setProcessing] = useState(false);
-    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const {
+        register,
+        handleSubmit,
+        setError,
+        setValue,
+        watch,
+        reset,
+        control,
+        formState: { errors },
+    } = useForm<DepartmentFormState>({
+        defaultValues: emptyDepartmentForm,
+    });
 
     const submitFilters = (nextFilters: Filters = filterValues) => {
         router.get(
@@ -65,64 +70,26 @@ export function useDepartmentActions({
     };
 
     const handleCreate = () => {
-        form.reset();
-        form.setData(emptyDepartmentForm);
-        setErrors({});
+        reset({ ...emptyDepartmentForm });
         setOpenForm(true);
-    };
+    }
 
     const handleEdit = (item: DepartmentItem) => {
-        form.setData({
+        reset({
             id: item.id,
             code: item.code,
             name: item.name,
             is_active: item.is_active,
         });
-
-        setErrors({});
         setOpenForm(true);
-    };
+    }
 
     const handleDelete = (item: DepartmentItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
-    };
+    }
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const payload = {
-            code: form.data.code,
-            name: form.data.name,
-            is_active: form.data.is_active,
-        };
-
-        setProcessing(true);
-
-        const options = {
-            preserveScroll: true,
-            onError: (errors: Record<string, string>) => {
-                setErrors(errors);
-            },
-            onSuccess: () => {
-                setOpenForm(false);
-                form.reset();
-            },
-            onFinish: () => {
-                setProcessing(false);
-            },
-        };
-
-        if (form.data.id) {
-            router.put(update(form.data.id), payload, options);
-
-            return;
-        }
-
-        router.post(store(), payload, options);
-    };
-
-    const confirmDelete = () => {
+     const confirmDelete = () => {
         if (!selectedItem) {
             return;
         }
@@ -131,6 +98,9 @@ export function useDepartmentActions({
 
         router.delete(destroy(selectedItem.id), {
             preserveScroll: true,
+            onError: () => {
+                setProcessing(false);
+            },
             onSuccess: () => {
                 setOpenDelete(false);
                 setSelectedItem(null);
@@ -139,7 +109,53 @@ export function useDepartmentActions({
                 setProcessing(false);
             },
         });
-    };
+    }
+
+    const onSubmit = (data: DepartmentFormState) => {
+        setProcessing(true);
+        const payload = {
+            code: data.code,
+            name: data.name,
+            is_active: data.is_active,
+        };
+
+        if (data.id) {
+            router.put(update(data.id), payload, {
+                preserveScroll: true,
+                onError: (errors) => {
+                    Object.entries(errors).forEach(([field, message]) => {
+                        setError(field as keyof DepartmentFormState, { message });
+                    });
+                    setProcessing(false);
+                },
+                onSuccess: () => {
+                    setOpenForm(false);
+                    reset();
+                    setProcessing(false);
+                },
+                onFinish: () => setProcessing(false),
+            });
+
+            return;
+        }
+
+        router.post(store(), payload, {
+            preserveScroll: true,
+            onError: (errors) => {
+                Object.entries(errors).forEach(([field, message]) => {
+                    setError(field as keyof DepartmentFormState, { message });
+                });
+                setProcessing(false);
+            },
+            onSuccess: () => {
+                setOpenForm(false);
+                reset();
+                setProcessing(false);
+            },
+            onFinish: () =>
+                setProcessing(false),
+        });
+    }
 
     const columns = useMemo(
         () =>
@@ -151,6 +167,9 @@ export function useDepartmentActions({
         [t],
     );
 
+
+    const isEditMode = !!watch('id');
+
     return {
         columns,
 
@@ -159,19 +178,30 @@ export function useDepartmentActions({
 
         openDelete,
         setOpenDelete,
+        confirmDelete,
 
         selectedItem,
         setSelectedItem,
 
-        processing,
-        errors,
+        isProcessing: processing,
 
         submitFilters,
         resetFilters,
         handleCreate,
         handleEdit,
         handleDelete,
-        handleSubmit,
-        confirmDelete,
+
+
+        // reach-hook-form
+        handleSubmit: handleSubmit(onSubmit),
+        register,
+        setValue,
+        reset,
+        control,
+        watch,
+        errors,
+        Controller,
+
+        isEditMode,
     };
 }

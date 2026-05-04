@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { index } from '@/actions/App/Http/Controllers/PositionController';
@@ -16,10 +16,7 @@ import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
-import type {
-    PositionFormState,
-    PositionPaginate,
-} from '../../types/app/position-type';
+import type { PositionPaginate } from '../../types/app/position-type';
 import { emptyPositionForm } from '../../types/app/position-type';
 import { usePositionActions } from './use-position-action';
 
@@ -31,7 +28,6 @@ export default function PositionIndex({
     filters: Filters;
 }) {
     const { t } = useTranslations();
-    const form = useForm<PositionFormState>(emptyPositionForm);
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
@@ -43,30 +39,28 @@ export default function PositionIndex({
     const hasFilters =
         !!filters.search || !!filters.status || filters.per_page !== 10;
 
-    const isEditing = !!form.data.id;
-
     const {
         columns,
-
         openForm,
         setOpenForm,
-
+        isProcessing,
         openDelete,
         setOpenDelete,
-
+        confirmDelete,
         selectedItem,
 
-        processing,
         errors,
+        register,
+        handleSubmit,
+        control,
 
         submitFilters,
         resetFilters,
         handleCreate,
-        handleSubmit,
-        confirmDelete,
+
+        isEditMode,
     } = usePositionActions({
         t,
-        form,
         filterValues,
         setFilterValues,
         defaultFilters,
@@ -123,44 +117,46 @@ export default function PositionIndex({
             </div>
 
             <AppDialog
-                open={openForm}
-                onOpenChange={setOpenForm}
-                title={isEditing ? t('positions.edit') : t('positions.create')}
-                description={t('positions.dialog_description')}
+                openDialogState={{
+                    open: openForm,
+                    onOpenChange: setOpenForm,
+                }}
+                title={isEditMode ? t('prefixes.edit') : t('prefixes.create')}
+                description={t('prefixes.dialog_description')}
                 submitLabel={
-                    isEditing ? t('ui.save_changes') : t('positions.create')
+                    isEditMode ? t('ui.save_changes') : t('prefixes.create')
                 }
-                processing={processing}
+                disable={isProcessing}
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
                     <AppInput
-                        type="text"
                         label={t('positions.name')}
+                        registration={register('name', {
+                            required: t('positions.validation.name_required'),
+                        })}
                         error={errors.name}
-                        value={form.data.name}
-                        onChange={(value) => form.setData('name', value)}
-                        placeholder={t('positions.placeholder_name')}
-                        isRequired
+                        required
+                        disabled={isProcessing}
                     />
+
                     <AppSwitch
                         label={t('ui.active')}
-                        // description={t('positions.available_hint')}
-                        checked={form.data.is_active}
-                        onCheckedChange={(checked) =>
-                            form.setData('is_active', checked)
-                        }
+                        disabled={isProcessing}
+                        control={control}
+                        controlName="is_active"
                     />
                 </FieldGroup>
             </AppDialog>
+
             <AppConfirm
                 icon={<Trash2 />}
-                title={t('positions.delete_title')}
-                description={t('positions.delete_confirmation', {
+                title={t('warehouses.delete_title')}
+                description={t('warehouses.delete_confirmation', {
                     name: selectedItem?.name ?? '',
                 })}
                 openDialog={{ open: openDelete, setOpen: setOpenDelete }}
-                disable={processing}
+                disable={isProcessing}
                 onClick={confirmDelete}
                 buttonLabel={
                     <>

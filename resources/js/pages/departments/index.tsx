@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { index } from '@/actions/App/Http/Controllers/DepartmentController';
@@ -17,10 +17,7 @@ import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
 import { emptyDepartmentForm } from '../../types/app/department-type';
-import type {
-    DepartmentFormState,
-    DepartmentPaginate,
-} from '../../types/app/department-type';
+import type { DepartmentPaginate } from '../../types/app/department-type';
 import { useDepartmentActions } from './use-department-action';
 
 export default function DepartmentIndex({
@@ -31,7 +28,6 @@ export default function DepartmentIndex({
     filters: Filters;
 }) {
     const { t } = useTranslations();
-    const form = useForm<DepartmentFormState>(emptyDepartmentForm);
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
@@ -43,30 +39,28 @@ export default function DepartmentIndex({
     const hasFilters =
         !!filters.search || !!filters.status || filters.per_page !== 10;
 
-    const isEditing = !!form.data.id;
-
     const {
         columns,
-
         openForm,
         setOpenForm,
-
+        isProcessing,
         openDelete,
         setOpenDelete,
-
+        confirmDelete,
         selectedItem,
 
-        processing,
         errors,
+        register,
+        handleSubmit,
+        control,
 
         submitFilters,
         resetFilters,
         handleCreate,
-        handleSubmit,
-        confirmDelete,
+
+        isEditMode,
     } = useDepartmentActions({
         t,
-        form,
         filterValues,
         setFilterValues,
         defaultFilters,
@@ -123,44 +117,48 @@ export default function DepartmentIndex({
             </div>
 
             <AppDialog
-                open={openForm}
-                onOpenChange={setOpenForm}
+                openDialogState={{
+                    open: openForm,
+                    onOpenChange: setOpenForm,
+                }}
                 title={
-                    isEditing ? t('departments.edit') : t('departments.create')
+                    isEditMode
+                        ? t('departments.edit')
+                        : t('departments.create')
                 }
                 description={t('departments.dialog_description')}
                 submitLabel={
-                    isEditing ? t('ui.save_changes') : t('departments.create')
+                    isEditMode ? t('ui.save_changes') : t('departments.create')
                 }
-                processing={processing}
+                disable={isProcessing}
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
                     <AppInput
-                        type="text"
                         label={t('departments.code')}
-                        value={form.data.code}
-                        onChange={(value) => form.setData('code', value)}
+                        registration={register('code', {
+                            required: t('departments.validation.code_required'),
+                        })}
                         error={errors.code}
-                        placeholder={t('departments.placeholder_code')}
-                        isRequired
+                        required
+                        disabled={isProcessing}
                     />
+
                     <AppInput
-                        type="text"
                         label={t('departments.name')}
-                        value={form.data.name}
-                        onChange={(value) => form.setData('name', value)}
+                        registration={register('name', {
+                            required: t('departments.validation.name_required'),
+                        })}
                         error={errors.name}
-                        placeholder={t('departments.placeholder_name')}
-                        isRequired
+                        required
+                        disabled={isProcessing}
                     />
+
                     <AppSwitch
                         label={t('ui.active')}
-                        description={t('departments.available_hint')}
-                        checked={form.data.is_active}
-                        onCheckedChange={(checked) =>
-                            form.setData('is_active', checked)
-                        }
+                        disabled={isProcessing}
+                        control={control}
+                        controlName="is_active"
                     />
                 </FieldGroup>
             </AppDialog>
@@ -172,7 +170,7 @@ export default function DepartmentIndex({
                     name: selectedItem?.name ?? '',
                 })}
                 openDialog={{ open: openDelete, setOpen: setOpenDelete }}
-                disable={processing}
+                disable={isProcessing}
                 onClick={confirmDelete}
                 buttonLabel={
                     <>

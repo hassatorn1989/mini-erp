@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 // eslint-disable-next-line import/order
@@ -20,7 +20,6 @@ import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
 import { emptyItemCategoryForm } from '../../types/app/item-category-type';
 import type {
-    ItemCategoryFormState,
     ItemCategoryPaginate,
     ParentCategoryOption,
 } from '../../types/app/item-category-type';
@@ -36,7 +35,6 @@ export default function ItemCategoryIndex({
     filters: Filters;
 }) {
     const { t } = useTranslations();
-    const form = useForm<ItemCategoryFormState>(emptyItemCategoryForm);
     const [filterValues, setFilterValues] = useState<Filters>({
         ...defaultFilters,
         ...filters,
@@ -48,30 +46,29 @@ export default function ItemCategoryIndex({
     const hasFilters =
         !!filters.search || !!filters.status || filters.per_page !== 10;
 
-    const isEditing = !!form.data.id;
-
     const {
         columns,
-
         openForm,
         setOpenForm,
-
+        isProcessing,
         openDelete,
         setOpenDelete,
-
+        confirmDelete,
         selectedItem,
 
-        processing,
+        watch,
         errors,
+        register,
+        handleSubmit,
+        control,
 
         submitFilters,
         resetFilters,
         handleCreate,
-        handleSubmit,
-        confirmDelete,
+
+        isEditMode,
     } = useItemCategoryActions({
         t,
-        form,
         filterValues,
         setFilterValues,
         defaultFilters,
@@ -124,56 +121,53 @@ export default function ItemCategoryIndex({
                     emptyDescription={t('item_categories.no_results')}
                     emptyTitle={t('item_categories.no_data')}
                 />
-
             </div>
 
             <AppDialog
-                open={openForm}
-                onOpenChange={setOpenForm}
+                openDialogState={{
+                    open: openForm,
+                    onOpenChange: setOpenForm,
+                }}
                 title={
-                    isEditing
+                    isEditMode
                         ? t('item_categories.edit')
                         : t('item_categories.create')
                 }
                 description={t('item_categories.dialog_description')}
                 submitLabel={
-                    isEditing
+                    isEditMode
                         ? t('ui.save_changes')
                         : t('item_categories.create')
                 }
-                processing={processing}
+                disable={isProcessing}
                 onSubmit={handleSubmit}
             >
                 <FieldGroup>
                     <AppInput
-                        type="text"
                         label={t('item_categories.code')}
-                        value={form.data.code}
-                        onChange={(value) => form.setData('code', value)}
+                        registration={register('code', {
+                            required: t(
+                                'item_categories.validation.code_required',
+                            ),
+                        })}
                         error={errors.code}
-                        placeholder={t('item_categories.placeholder_code')}
-                        isRequired={true}
+                        required
+                        disabled={isProcessing}
                     />
 
                     <AppInput
-                        type="text"
                         label={t('item_categories.name')}
-                        value={form.data.name}
-                        onChange={(value) => form.setData('name', value)}
+                        registration={register('name', {
+                            required: t(
+                                'item_categories.validation.name_required',
+                            ),
+                        })}
                         error={errors.name}
-                        placeholder={t('item_categories.placeholder_name')}
-                        isRequired={true}
+                        required
+                        disabled={isProcessing}
                     />
                     <AppSelect
                         label={t('item_categories.parent_category')}
-                        value={form.data.parent_id || ''}
-                        onChange={(value) =>
-                            form.setData(
-                                'parent_id',
-                                value === 'none' ? null : value,
-                            )
-                        }
-                        error={errors.parent_id}
                         placeholder={t('item_categories.no_parent')}
                         options={[
                             {
@@ -183,22 +177,25 @@ export default function ItemCategoryIndex({
                             ...parentCategories
                                 .filter(
                                     (option) =>
-                                        !form.data.id ||
-                                        option.id !== form.data.id,
+                                        !watch('id') ||
+                                        option.id !== watch('id'),
                                 )
                                 .map((item) => ({
                                     value: item.id.toString(),
                                     label: `${item.name} (${item.code})`,
                                 })),
                         ]}
+                        control={control}
+                        controlName="parent_id"
+                        disabled={isProcessing}
                     />
+
                     <AppSwitch
                         label={t('ui.active')}
                         description={t('item_categories.active_hint')}
-                        checked={form.data.is_active}
-                        onCheckedChange={(checked) =>
-                            form.setData('is_active', checked)
-                        }
+                        control={control}
+                        controlName="is_active"
+                        disabled={isProcessing}
                     />
                 </FieldGroup>
             </AppDialog>
@@ -210,7 +207,7 @@ export default function ItemCategoryIndex({
                     name: selectedItem?.name ?? '',
                 })}
                 openDialog={{ open: openDelete, setOpen: setOpenDelete }}
-                disable={processing}
+                disable={isProcessing}
                 onClick={confirmDelete}
                 buttonLabel={
                     <>

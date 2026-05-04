@@ -14,9 +14,13 @@ import {
 import { useTranslations } from '@/hooks/use-translations';
 import { Spinner } from '../ui/spinner';
 
-type AppDialogProps = {
+type openDialogState = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+};
+
+type AppDialogProps = {
+    openDialogState: openDialogState;
 
     title: string;
     description?: string;
@@ -25,28 +29,30 @@ type AppDialogProps = {
 
     submitLabel?: string;
     cancelLabel?: string;
-    processing?: boolean;
+    disable?: boolean;
 
     onSubmit: (e: FormEvent<HTMLFormElement>) => void;
     className?: string;
 };
 
 export function AppDialog({
-    open,
-    onOpenChange,
+    openDialogState,
     title,
     description,
     children,
     submitLabel,
     cancelLabel,
-    processing = false,
+    disable = false,
     onSubmit,
     className = '',
 }: AppDialogProps) {
     const { t } = useTranslations();
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            open={openDialogState.open}
+            onOpenChange={openDialogState.onOpenChange}
+        >
             <DialogContent
                 className={`${className}`}
                 onInteractOutside={(event) => {
@@ -72,15 +78,15 @@ export function AppDialog({
                             <Button
                                 type="button"
                                 variant="outline"
-                                disabled={processing}
+                                disabled={disable}
                             >
                                 <X className="size-4" />
                                 {cancelLabel ?? t('ui.cancel')}
                             </Button>
                         </DialogClose>
 
-                        <Button type="submit" disabled={processing}>
-                            {processing ? (
+                        <Button type="submit" disabled={disable}>
+                            {disable ? (
                                 <>
                                     <Spinner className="size-4 animate-spin" />
                                     {t('ui.saving')}
