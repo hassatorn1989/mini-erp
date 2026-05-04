@@ -56,10 +56,10 @@ function AppFilterForm({
                         <AppSelect
                             value={filter.status || 'all'}
                             onChange={(value) =>
-                                setFilter((current) => ({
-                                    ...current,
+                                setFilter({
+                                    ...filter,
                                     status: value === 'all' ? '' : value,
-                                }))
+                                })
                             }
                             options={statusActiveOptions.map((status) => ({
                                 value: status,
@@ -70,10 +70,10 @@ function AppFilterForm({
                         <AppSelect
                             value={filter.per_page.toString()}
                             onChange={(value) =>
-                                setFilter((current) => ({
-                                    ...current,
+                                setFilter({
+                                    ...filter,
                                     per_page: parseInt(value, defaultPerPage),
-                                }))
+                                })
                             }
                             options={perPages.map((perPage) => ({
                                 value: perPage.toString(),

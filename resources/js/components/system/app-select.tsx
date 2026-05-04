@@ -4,7 +4,8 @@ import {
     FieldContent,
     FieldDescription,
     FieldLabel,
-} from '@/components/ui/field';import {
+} from '@/components/ui/field';
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -15,11 +16,11 @@ import {
 type Options = {
     value: string;
     label: string;
-}
+};
 
 type AppSelectProps = {
     label?: string;
-    error?: boolean;
+    error?: boolean | string;
     placeholder?: string;
     value: string;
     options: Options[];
@@ -27,14 +28,25 @@ type AppSelectProps = {
     disabled?: boolean;
     isRequired?: boolean;
 };
-function AppSelect({ label, error, placeholder, value, options, onChange, disabled, isRequired = false }: AppSelectProps) {
+function AppSelect({
+    label,
+    error,
+    placeholder,
+    value,
+    options,
+    onChange,
+    disabled,
+    isRequired = false,
+}: AppSelectProps) {
     return (
         <>
             <Field data-invalid={!!error}>
                 {label && (
                     <FieldLabel>
                         {label}
-                        {isRequired && <span className="text-destructive">*</span>}
+                        {isRequired && (
+                            <span className="text-destructive">*</span>
+                        )}
                     </FieldLabel>
                 )}
                 <FieldContent>
@@ -48,9 +60,7 @@ function AppSelect({ label, error, placeholder, value, options, onChange, disabl
                             aria-invalid={!!error}
                         >
                             <SelectValue
-                                placeholder={
-                                     '-- ' + placeholder + ' --'
-                                }
+                                placeholder={'-- ' + placeholder + ' --'}
                             />
                         </SelectTrigger>
                         <SelectContent>

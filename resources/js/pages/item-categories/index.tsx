@@ -10,12 +10,9 @@ import { AppDialog } from '@/components/system/app-dialog';
 import AppFilterForm from '@/components/system/app-filter-form';
 import AppInput from '@/components/system/app-input';
 import AppMainStat from '@/components/system/app-main-stat';
-import { AppPagination } from '@/components/system/app-pagination';
 import AppSelect from '@/components/system/app-select';
 import AppSwitch from '@/components/system/app-switch';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FieldGroup } from '@/components/ui/field';
 import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
@@ -116,44 +113,18 @@ export default function ItemCategoryIndex({
                     }}
                     resetFilters={resetFilters}
                 />
+                <AppDataTable
+                    columns={columns}
+                    itemData={items.data}
+                    itemFrom={items.from ?? 0}
+                    itemTo={items.to ?? 0}
+                    itemTotal={items.total}
+                    itemLinks={items.links}
+                    hasFilters={hasFilters}
+                    emptyDescription={t('item_categories.no_results')}
+                    emptyTitle={t('item_categories.no_data')}
+                />
 
-                <Card className="gap-0 py-0">
-                    <CardHeader className="border-b py-4">
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <CardTitle>
-                                    {t('item_categories.title')}
-                                </CardTitle>
-                                <p className="text-sm text-muted-foreground">
-                                    {t('item_categories.showing', {
-                                        from: items.from ?? 0,
-                                        to: items.to ?? 0,
-                                        total: items.total,
-                                    })}
-                                </p>
-                            </div>
-
-                            {hasFilters && (
-                                <Badge variant="outline">
-                                    {t('ui.filtered_results')}
-                                </Badge>
-                            )}
-                        </div>
-                    </CardHeader>
-
-                    <CardContent className="p-0">
-                        <AppDataTable
-                            columns={columns}
-                            data={items.data}
-                            emptyDescription={t(
-                                'item_categories.empty_description',
-                            )}
-                            emptyTitle={t('item_categories.empty_title')}
-                        />
-                    </CardContent>
-                </Card>
-
-                <AppPagination links={items.links} />
             </div>
 
             <AppDialog

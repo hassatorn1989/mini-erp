@@ -7,36 +7,38 @@ import {
     index,
     store,
     update,
-} from '@/actions/App/Http/Controllers/WarehouseController';
-import type { WarehouseFormState, WarehouseItem } from '@/types/app/warehouse-type';
+} from '@/actions/App/Http/Controllers/EmployeeController';
+import type {
+    EmployeeFormState,
+    EmployeeItem,
+} from '@/types/app/employee-type';
 import type { Filters } from '@/types/default';
 import { getColumns } from './column';
 
-
-type UseWarehouseActionsProps = {
+type UseEmployeeActionsProps = {
     t: (key: string) => string;
     form: {
-        data: WarehouseFormState;
-        setData: (data: WarehouseFormState) => void;
+        data: EmployeeFormState;
+        setData: (data: EmployeeFormState) => void;
         reset: () => void;
     };
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
-    emptyWarehouseForm: WarehouseFormState;
+    emptyEmployeeForm: EmployeeFormState;
 };
 
-export function useWarehouseActions({
+export function useEmployeeActions({
     t,
     form,
     filterValues,
     setFilterValues,
     defaultFilters,
-    emptyWarehouseForm,
-}: UseWarehouseActionsProps) {
+    emptyEmployeeForm,
+}: UseEmployeeActionsProps) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<WarehouseItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<EmployeeItem | null>(null);
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -65,25 +67,34 @@ export function useWarehouseActions({
 
     const handleCreate = () => {
         form.reset();
-        form.setData(emptyWarehouseForm);
+        form.setData(emptyEmployeeForm);
         setErrors({});
         setOpenForm(true);
     };
 
-    const handleEdit = (item: WarehouseItem) => {
+    const handleEdit = (item: EmployeeItem) => {
         form.setData({
             id: item.id,
+            prefix_id: item.prefix_id,
+            position_id: item.position_id,
+            department_id: item.department_id,
             code: item.code,
-            name: item.name,
-            type: item.type,
+            first_name: item.first_name,
+            last_name: item.last_name,
+            email: item.email,
+            phone: item.phone,
+            hire_date: item.hire_date,
+            termination_date: item.termination_date,
             is_active: item.is_active,
+            username: item.user?.username || '',
+            password: '',
         });
 
         setErrors({});
         setOpenForm(true);
     };
 
-    const handleDelete = (item: WarehouseItem) => {
+    const handleDelete = (item: EmployeeItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
     };
@@ -92,10 +103,19 @@ export function useWarehouseActions({
         e.preventDefault();
 
         const payload = {
+            prefix_id: form.data.prefix_id,
+            position_id: form.data.position_id,
+            department_id: form.data.department_id,
             code: form.data.code,
-            name: form.data.name,
-            type: form.data.type,
+            first_name: form.data.first_name,
+            last_name: form.data.last_name,
+            email: form.data.email,
+            phone: form.data.phone,
+            hire_date: form.data.hire_date,
+            termination_date: form.data.termination_date,
             is_active: form.data.is_active,
+            username: form.data.username,
+            password: form.data.password,
         };
 
         setProcessing(true);
