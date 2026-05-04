@@ -16,9 +16,9 @@ import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
+import { usePrefixActions } from '../../hooks/app/use-prefix-action';
 import { emptyPrefixForm } from '../../types/app/prefix-type';
 import type { PrefixPaginate } from '../../types/app/prefix-type';
-import { usePrefixActions } from './use-prefix-action';
 
 export default function PrefixIndex({
     items,

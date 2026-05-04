@@ -16,9 +16,9 @@ import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
+import { useDepartmentActions } from '../../hooks/app/use-department-action';
 import { emptyDepartmentForm } from '../../types/app/department-type';
 import type { DepartmentPaginate } from '../../types/app/department-type';
-import { useDepartmentActions } from './use-department-action';
 
 export default function DepartmentIndex({
     items,

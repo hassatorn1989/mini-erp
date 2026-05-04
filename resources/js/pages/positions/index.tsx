@@ -16,9 +16,9 @@ import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
+import { usePositionActions } from '../../hooks/app/use-position-action';
 import type { PositionPaginate } from '../../types/app/position-type';
 import { emptyPositionForm } from '../../types/app/position-type';
-import { usePositionActions } from './use-position-action';
 
 export default function PositionIndex({
     items,

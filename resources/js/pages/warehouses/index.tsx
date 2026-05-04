@@ -17,9 +17,9 @@ import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
+import { useWarehouseActions } from '../../hooks/app/use-warehouse-action';
 import { emptyWarehouseForm } from '../../types/app/warehouse-type';
 import type { WarehousePaginate } from '../../types/app/warehouse-type';
-import { useWarehouseActions } from './use-warehouse-action';
 
 const optionTypes = [
     {

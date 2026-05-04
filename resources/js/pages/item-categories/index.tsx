@@ -18,12 +18,12 @@ import { defaultFilters } from '@/constants/app';
 import { useTranslations } from '@/hooks/use-translations';
 import { dashboard } from '@/routes';
 import type { Filters } from '@/types/default';
+import { useItemCategoryActions } from '../../hooks/app/use-item-category-action';
 import { emptyItemCategoryForm } from '../../types/app/item-category-type';
 import type {
     ItemCategoryPaginate,
     ParentCategoryOption,
 } from '../../types/app/item-category-type';
-import { useItemCategoryActions } from './use-item-category-action';
 
 export default function ItemCategoryIndex({
     items,

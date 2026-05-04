@@ -7,35 +7,30 @@ import {
     index,
     store,
     update,
-} from '@/actions/App/Http/Controllers/ItemCategoryController';
+} from '@/actions/App/Http/Controllers/DepartmentController';
 
-import type {
-    ItemCategoryFormState,
-    ItemCategoryItem,
-} from '@/types/app/item-category-type';
+import type { DepartmentFormState, DepartmentItem } from '@/types/app/department-type';
 import type { Filters } from '@/types/default';
-import { getColumns } from './column';
+import { getColumns } from '../../pages/departments/column';
 
-type UseItemCategoryActionsProps = {
+type UseDepartmentActionsProps = {
     t: (key: string) => string;
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
-    emptyItemCategoryForm: ItemCategoryFormState;
+    emptyDepartmentForm: DepartmentFormState;
 };
 
-export function useItemCategoryActions({
+export function useDepartmentActions({
     t,
     filterValues,
     setFilterValues,
     defaultFilters,
-    emptyItemCategoryForm,
-}: UseItemCategoryActionsProps) {
+    emptyDepartmentForm,
+}: UseDepartmentActionsProps) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<ItemCategoryItem | null>(
-        null,
-    );
+    const [selectedItem, setSelectedItem] = useState<DepartmentItem | null>(null);
     const [processing, setProcessing] = useState(false);
 
     const {
@@ -47,8 +42,8 @@ export function useItemCategoryActions({
         reset,
         control,
         formState: { errors },
-    } = useForm<ItemCategoryFormState>({
-        defaultValues: emptyItemCategoryForm,
+    } = useForm<DepartmentFormState>({
+        defaultValues: emptyDepartmentForm,
     });
 
     const submitFilters = (nextFilters: Filters = filterValues) => {
@@ -75,28 +70,26 @@ export function useItemCategoryActions({
     };
 
     const handleCreate = () => {
-        reset({ ...emptyItemCategoryForm });
+        reset({ ...emptyDepartmentForm });
         setOpenForm(true);
-    };
+    }
 
-    const handleEdit = (item: ItemCategoryItem) => {
+    const handleEdit = (item: DepartmentItem) => {
         reset({
             id: item.id,
             code: item.code,
             name: item.name,
-            parent_id: item.parent_id,
             is_active: item.is_active,
         });
-
         setOpenForm(true);
-    };
+    }
 
-    const handleDelete = (item: ItemCategoryItem) => {
+    const handleDelete = (item: DepartmentItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
-    };
+    }
 
-    const confirmDelete = () => {
+     const confirmDelete = () => {
         if (!selectedItem) {
             return;
         }
@@ -116,14 +109,13 @@ export function useItemCategoryActions({
                 setProcessing(false);
             },
         });
-    };
+    }
 
-    const onSubmit = (data: ItemCategoryFormState) => {
+    const onSubmit = (data: DepartmentFormState) => {
         setProcessing(true);
         const payload = {
             code: data.code,
             name: data.name,
-            parent_id: data.parent_id,
             is_active: data.is_active,
         };
 
@@ -132,15 +124,13 @@ export function useItemCategoryActions({
                 preserveScroll: true,
                 onError: (errors) => {
                     Object.entries(errors).forEach(([field, message]) => {
-                        setError(field as keyof ItemCategoryFormState, {
-                            message,
-                        });
+                        setError(field as keyof DepartmentFormState, { message });
                     });
                     setProcessing(false);
                 },
                 onSuccess: () => {
                     setOpenForm(false);
-                    reset({ ...emptyItemCategoryForm });
+                    reset();
                     setProcessing(false);
                 },
                 onFinish: () => setProcessing(false),
@@ -153,18 +143,19 @@ export function useItemCategoryActions({
             preserveScroll: true,
             onError: (errors) => {
                 Object.entries(errors).forEach(([field, message]) => {
-                    setError(field as keyof ItemCategoryFormState, { message });
+                    setError(field as keyof DepartmentFormState, { message });
                 });
                 setProcessing(false);
             },
             onSuccess: () => {
                 setOpenForm(false);
-                reset({ ...emptyItemCategoryForm });
+                reset();
                 setProcessing(false);
             },
-            onFinish: () => setProcessing(false),
+            onFinish: () =>
+                setProcessing(false),
         });
-    };
+    }
 
     const columns = useMemo(
         () =>
@@ -175,6 +166,7 @@ export function useItemCategoryActions({
             }),
         [t],
     );
+
 
     const isEditMode = !!watch('id');
 
@@ -198,6 +190,7 @@ export function useItemCategoryActions({
         handleCreate,
         handleEdit,
         handleDelete,
+
 
         // reach-hook-form
         handleSubmit: handleSubmit(onSubmit),

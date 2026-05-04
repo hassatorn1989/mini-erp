@@ -7,30 +7,35 @@ import {
     index,
     store,
     update,
-} from '@/actions/App/Http/Controllers/PrefixController';
+} from '@/actions/App/Http/Controllers/ItemCategoryController';
 
-import type { PrefixFormState, PrefixItem } from '@/types/app/prefix-type';
+import type {
+    ItemCategoryFormState,
+    ItemCategoryItem,
+} from '@/types/app/item-category-type';
 import type { Filters } from '@/types/default';
-import { getColumns } from './column';
+import { getColumns } from '../../pages/item-categories/column';
 
-type UsePrefixActionsProps = {
+type UseItemCategoryActionsProps = {
     t: (key: string) => string;
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
-    emptyPrefixForm: PrefixFormState;
+    emptyItemCategoryForm: ItemCategoryFormState;
 };
 
-export function usePrefixActions({
+export function useItemCategoryActions({
     t,
     filterValues,
     setFilterValues,
     defaultFilters,
-    emptyPrefixForm,
-}: UsePrefixActionsProps) {
+    emptyItemCategoryForm,
+}: UseItemCategoryActionsProps) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<PrefixItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<ItemCategoryItem | null>(
+        null,
+    );
     const [processing, setProcessing] = useState(false);
 
     const {
@@ -42,8 +47,8 @@ export function usePrefixActions({
         reset,
         control,
         formState: { errors },
-    } = useForm<PrefixFormState>({
-        defaultValues: emptyPrefixForm,
+    } = useForm<ItemCategoryFormState>({
+        defaultValues: emptyItemCategoryForm,
     });
 
     const submitFilters = (nextFilters: Filters = filterValues) => {
@@ -70,20 +75,23 @@ export function usePrefixActions({
     };
 
     const handleCreate = () => {
-        reset({ ...emptyPrefixForm });
+        reset({ ...emptyItemCategoryForm });
         setOpenForm(true);
     };
 
-    const handleEdit = (item: PrefixItem) => {
+    const handleEdit = (item: ItemCategoryItem) => {
         reset({
             id: item.id,
+            code: item.code,
             name: item.name,
+            parent_id: item.parent_id,
             is_active: item.is_active,
         });
+
         setOpenForm(true);
     };
 
-    const handleDelete = (item: PrefixItem) => {
+    const handleDelete = (item: ItemCategoryItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
     };
@@ -110,10 +118,12 @@ export function usePrefixActions({
         });
     };
 
-    const onSubmit = (data: PrefixFormState) => {
+    const onSubmit = (data: ItemCategoryFormState) => {
         setProcessing(true);
         const payload = {
+            code: data.code,
             name: data.name,
+            parent_id: data.parent_id,
             is_active: data.is_active,
         };
 
@@ -122,13 +132,15 @@ export function usePrefixActions({
                 preserveScroll: true,
                 onError: (errors) => {
                     Object.entries(errors).forEach(([field, message]) => {
-                        setError(field as keyof PrefixFormState, { message });
+                        setError(field as keyof ItemCategoryFormState, {
+                            message,
+                        });
                     });
                     setProcessing(false);
                 },
                 onSuccess: () => {
                     setOpenForm(false);
-                    reset({ ...emptyPrefixForm });
+                    reset({ ...emptyItemCategoryForm });
                     setProcessing(false);
                 },
                 onFinish: () => setProcessing(false),
@@ -141,13 +153,13 @@ export function usePrefixActions({
             preserveScroll: true,
             onError: (errors) => {
                 Object.entries(errors).forEach(([field, message]) => {
-                    setError(field as keyof PrefixFormState, { message });
+                    setError(field as keyof ItemCategoryFormState, { message });
                 });
                 setProcessing(false);
             },
             onSuccess: () => {
                 setOpenForm(false);
-                reset({ ...emptyPrefixForm });
+                reset({ ...emptyItemCategoryForm });
                 setProcessing(false);
             },
             onFinish: () => setProcessing(false),

@@ -7,30 +7,30 @@ import {
     index,
     store,
     update,
-} from '@/actions/App/Http/Controllers/DepartmentController';
+} from '@/actions/App/Http/Controllers/PrefixController';
 
-import type { DepartmentFormState, DepartmentItem } from '@/types/app/department-type';
+import type { PrefixFormState, PrefixItem } from '@/types/app/prefix-type';
 import type { Filters } from '@/types/default';
-import { getColumns } from './column';
+import { getColumns } from '../../pages/prefixes/column';
 
-type UseDepartmentActionsProps = {
+type UsePrefixActionsProps = {
     t: (key: string) => string;
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
-    emptyDepartmentForm: DepartmentFormState;
+    emptyPrefixForm: PrefixFormState;
 };
 
-export function useDepartmentActions({
+export function usePrefixActions({
     t,
     filterValues,
     setFilterValues,
     defaultFilters,
-    emptyDepartmentForm,
-}: UseDepartmentActionsProps) {
+    emptyPrefixForm,
+}: UsePrefixActionsProps) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<DepartmentItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<PrefixItem | null>(null);
     const [processing, setProcessing] = useState(false);
 
     const {
@@ -42,8 +42,8 @@ export function useDepartmentActions({
         reset,
         control,
         formState: { errors },
-    } = useForm<DepartmentFormState>({
-        defaultValues: emptyDepartmentForm,
+    } = useForm<PrefixFormState>({
+        defaultValues: emptyPrefixForm,
     });
 
     const submitFilters = (nextFilters: Filters = filterValues) => {
@@ -70,26 +70,25 @@ export function useDepartmentActions({
     };
 
     const handleCreate = () => {
-        reset({ ...emptyDepartmentForm });
+        reset({ ...emptyPrefixForm });
         setOpenForm(true);
-    }
+    };
 
-    const handleEdit = (item: DepartmentItem) => {
+    const handleEdit = (item: PrefixItem) => {
         reset({
             id: item.id,
-            code: item.code,
             name: item.name,
             is_active: item.is_active,
         });
         setOpenForm(true);
-    }
+    };
 
-    const handleDelete = (item: DepartmentItem) => {
+    const handleDelete = (item: PrefixItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
-    }
+    };
 
-     const confirmDelete = () => {
+    const confirmDelete = () => {
         if (!selectedItem) {
             return;
         }
@@ -109,12 +108,11 @@ export function useDepartmentActions({
                 setProcessing(false);
             },
         });
-    }
+    };
 
-    const onSubmit = (data: DepartmentFormState) => {
+    const onSubmit = (data: PrefixFormState) => {
         setProcessing(true);
         const payload = {
-            code: data.code,
             name: data.name,
             is_active: data.is_active,
         };
@@ -124,13 +122,13 @@ export function useDepartmentActions({
                 preserveScroll: true,
                 onError: (errors) => {
                     Object.entries(errors).forEach(([field, message]) => {
-                        setError(field as keyof DepartmentFormState, { message });
+                        setError(field as keyof PrefixFormState, { message });
                     });
                     setProcessing(false);
                 },
                 onSuccess: () => {
                     setOpenForm(false);
-                    reset();
+                    reset({ ...emptyPrefixForm });
                     setProcessing(false);
                 },
                 onFinish: () => setProcessing(false),
@@ -143,19 +141,18 @@ export function useDepartmentActions({
             preserveScroll: true,
             onError: (errors) => {
                 Object.entries(errors).forEach(([field, message]) => {
-                    setError(field as keyof DepartmentFormState, { message });
+                    setError(field as keyof PrefixFormState, { message });
                 });
                 setProcessing(false);
             },
             onSuccess: () => {
                 setOpenForm(false);
-                reset();
+                reset({ ...emptyPrefixForm });
                 setProcessing(false);
             },
-            onFinish: () =>
-                setProcessing(false),
+            onFinish: () => setProcessing(false),
         });
-    }
+    };
 
     const columns = useMemo(
         () =>
@@ -166,7 +163,6 @@ export function useDepartmentActions({
             }),
         [t],
     );
-
 
     const isEditMode = !!watch('id');
 
@@ -190,7 +186,6 @@ export function useDepartmentActions({
         handleCreate,
         handleEdit,
         handleDelete,
-
 
         // reach-hook-form
         handleSubmit: handleSubmit(onSubmit),

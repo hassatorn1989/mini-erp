@@ -7,30 +7,35 @@ import {
     index,
     store,
     update,
-} from '@/actions/App/Http/Controllers/PositionController';
+} from '@/actions/App/Http/Controllers/WarehouseController';
 
-import type { PositionFormState, PositionItem } from '@/types/app/position-type';
+import type {
+    WarehouseFormState,
+    WarehouseItem,
+} from '@/types/app/warehouse-type';
 import type { Filters } from '@/types/default';
-import { getColumns } from './column';
+import { getColumns } from '../../pages/warehouses/column';
 
-type UsePositionActionsProps = {
+type UseWarehouseActionsProps = {
     t: (key: string) => string;
     filterValues: Filters;
     setFilterValues: React.Dispatch<React.SetStateAction<Filters>>;
     defaultFilters: Filters;
-    emptyPositionForm: PositionFormState;
+    emptyWarehouseForm: WarehouseFormState;
 };
 
-export function usePositionActions({
+export function useWarehouseActions({
     t,
     filterValues,
     setFilterValues,
     defaultFilters,
-    emptyPositionForm,
-}: UsePositionActionsProps) {
+    emptyWarehouseForm,
+}: UseWarehouseActionsProps) {
     const [openForm, setOpenForm] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<PositionItem | null>(null);
+    const [selectedItem, setSelectedItem] = useState<WarehouseItem | null>(
+        null,
+    );
     const [processing, setProcessing] = useState(false);
 
     const {
@@ -42,9 +47,10 @@ export function usePositionActions({
         reset,
         control,
         formState: { errors },
-    } = useForm<PositionFormState>({
-        defaultValues: emptyPositionForm,
+    } = useForm<WarehouseFormState>({
+        defaultValues: emptyWarehouseForm,
     });
+
 
     const submitFilters = (nextFilters: Filters = filterValues) => {
         router.get(
@@ -70,25 +76,28 @@ export function usePositionActions({
     };
 
     const handleCreate = () => {
-        reset();
+        reset({ ...emptyWarehouseForm });
         setOpenForm(true);
-    }
+    };
 
-    const handleEdit = (item: PositionItem) => {
-        reset();
-        setValue('id', item.id);
-        setValue('name', item.name);
-        setValue('is_active', item.is_active);
+    const handleEdit = (item: WarehouseItem) => {
+        reset({
+            id: item.id,
+            code: item.code,
+            name: item.name,
+            type: item.type,
+            is_active: item.is_active,
+        });
 
         setOpenForm(true);
-    }
+    };
 
-    const handleDelete = (item: PositionItem) => {
+    const handleDelete = (item: WarehouseItem) => {
         setSelectedItem(item);
         setOpenDelete(true);
-    }
+    };
 
-     const confirmDelete = () => {
+    const confirmDelete = () => {
         if (!selectedItem) {
             return;
         }
@@ -108,12 +117,14 @@ export function usePositionActions({
                 setProcessing(false);
             },
         });
-    }
+    };
 
-    const onSubmit = (data: PositionFormState) => {
+    const onSubmit = (data: WarehouseFormState) => {
         setProcessing(true);
         const payload = {
             name: data.name,
+            code: data.code,
+            type: data.type,
             is_active: data.is_active,
         };
 
@@ -122,7 +133,9 @@ export function usePositionActions({
                 preserveScroll: true,
                 onError: (errors) => {
                     Object.entries(errors).forEach(([field, message]) => {
-                        setError(field as keyof PositionFormState, { message });
+                        setError(field as keyof WarehouseFormState, {
+                            message,
+                        });
                     });
                     setProcessing(false);
                 },
@@ -141,7 +154,7 @@ export function usePositionActions({
             preserveScroll: true,
             onError: (errors) => {
                 Object.entries(errors).forEach(([field, message]) => {
-                    setError(field as keyof PositionFormState, { message });
+                    setError(field as keyof WarehouseFormState, { message });
                 });
                 setProcessing(false);
             },
@@ -150,10 +163,9 @@ export function usePositionActions({
                 reset();
                 setProcessing(false);
             },
-            onFinish: () =>
-                setProcessing(false),
+            onFinish: () => setProcessing(false),
         });
-    }
+    };
 
     const columns = useMemo(
         () =>
@@ -187,7 +199,6 @@ export function usePositionActions({
         handleCreate,
         handleEdit,
         handleDelete,
-
 
         // reach-hook-form
         handleSubmit: handleSubmit(onSubmit),
